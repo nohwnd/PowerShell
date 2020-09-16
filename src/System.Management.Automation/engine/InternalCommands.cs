@@ -2515,6 +2515,25 @@ namespace Microsoft.PowerShell.Commands
         private int _trace = -1;
 
         /// <summary>
+        /// The name of the trace variable that the trace will be written into.
+        /// </summary>
+        [Parameter(ParameterSetName = "on")]
+        public string TraceVariable
+        {
+            get
+            {
+                return _traceVariableName;
+            }
+
+            set
+            {
+                _traceVariableName = value;
+            }
+        }
+
+        private string _traceVariableName = null;
+
+        /// <summary>
         /// Gets or sets stepping on and off.
         /// </summary>
         [Parameter(ParameterSetName = "on")]
@@ -2584,9 +2603,32 @@ namespace Microsoft.PowerShell.Commands
             }
             else
             {
-                if (_trace >= 0 || _step != null)
+                IList<PSTraceLine> traceCollection = null;
+                if (_trace >= 1 && null != TraceVariable)
                 {
-                    Context.Debugger.EnableTracing(_trace, _step);
+                    // We are enabling tracing and we will collect the trace into a variable. 
+                    // If the variable does not exist create it, otherwise try to accept a value it already has. 
+
+                    var variable = SessionState.PSVariable.Get(TraceVariable);
+                    if (variable == null || variable.Value == null)
+                    {
+                        traceCollection = new List<PSTraceLine>();
+                        SessionState.PSVariable.Set(TraceVariable, traceCollection);
+                    }
+                    else if (variable.Value is IList<PSTraceLine> collection)
+                    {
+                        traceCollection = collection;
+                    }
+                    else
+                    {
+                        throw new ArgumentException($"Variable {TraceVariable} cannot be used to collect trace because it has value of type {variable.Value.GetType()}. " +
+                            $"Provide a variable name that does not exist or has value of type {nameof(IList<PSTraceLine>)}.");
+                    }
+                }
+
+                if (_trace >= 0 || _step != null)
+                {                    
+                    Context.Debugger.EnableTracing(_trace, _step, traceCollection);
                 }
 
                 // Version 0 is the same as off
@@ -2738,4 +2780,13 @@ namespace Microsoft.PowerShell.Commands
     #endregion Set-StrictMode
 
     #endregion Built-in cmdlets that are used by or require direct access to the engine.
+
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
+    public struct PSTraceLine
+    {
+        public IScriptExtent Extent { get; set; }
+
+        public long Timestamp { get; set; }
+    }
+#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
 }

@@ -19,7 +19,11 @@ using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using System.Threading;
 
+using Dbg = System.Management.Automation;
+
 using Microsoft.PowerShell.Commands.Internal.Format;
+using System.ComponentModel.DataAnnotations;
+using Microsoft.PowerShell.Commands;
 
 namespace System.Management.Automation
 {
@@ -984,6 +988,22 @@ namespace System.Management.Automation
     /// </summary>
     internal sealed class ScriptDebugger : Debugger, IDisposable
     {
+        #region Trace object
+
+        /// <summary>
+        /// User level tracing for sequence points.
+        /// </summary>
+        [Dbg.TraceSourceAttribute(
+             "SequencePoint",
+             "Traces command execution.")]
+        private static Dbg.PSTraceSource s_debuggerSequencePoint =
+            Dbg.PSTraceSource.GetTracer(
+                "SequencePoint",
+                "Traces command execution.",
+                false);
+
+        #endregion Trace object
+
         #region constructors
 
         internal ScriptDebugger(ExecutionContext context)
@@ -1541,7 +1561,15 @@ namespace System.Management.Automation
         {
             if (_context.ShouldTraceStatement && !_callStack.Last().IsFrameHidden && !functionContext._debuggerStepThrough)
             {
-                TraceLine(functionContext.CurrentPosition);
+                if (_context.PSDebugTraceCollection == null)
+                {
+                    TraceLine(functionContext.CurrentPosition);
+                }
+                else
+                {
+                    _context.PSDebugTraceCollection.Add(new PSTraceLine { Timestamp = Stopwatch.GetTimestamp(), Extent = functionContext.CurrentPosition });
+                    // s_debuggerSequencePoint.WriteLine($"Source {functionContext._file} | Line {functionContext.CurrentPosition.StartLineNumber} | Column {functionContext.CurrentPosition.StartColumnNumber} | Timestamp = {Stopwatch.GetTimestamp()}");
+                }
             }
 
             // If a nested debugger received a stop debug command then all debugging
@@ -4058,7 +4086,7 @@ namespace System.Management.Automation
 
         #region Tracing
 
-        internal void EnableTracing(int traceLevel, bool? step)
+        internal void EnableTracing(int traceLevel, bool? step, IList<PSTraceLine> traceCollection)
         {
             // Enable might actually be disabling depending on the arguments.
             if (traceLevel < 1 && (step == null || !(bool)step))
@@ -4071,6 +4099,12 @@ namespace System.Management.Automation
             _context.IgnoreScriptDebug = false;
 
             _context.PSDebugTraceLevel = traceLevel;
+
+            if (traceCollection != null)
+            {
+                _context.PSDebugTraceCollection = traceCollection;
+            }
+
             if (step != null)
             {
                 _context.PSDebugTraceStep = (bool)step;
@@ -4132,14 +4166,21 @@ namespace System.Management.Automation
 
         internal void TraceScriptFunctionEntry(FunctionContext functionContext)
         {
-            var methodName = functionContext._functionName;
-            if (string.IsNullOrEmpty(functionContext._file))
+            if (_context.PSDebugTraceCollection != null)
             {
-                Trace("TraceEnteringFunction", ParserStrings.TraceEnteringFunction, methodName);
+                _context.PSDebugTraceCollection.Add(new PSTraceLine { Extent = functionContext.CurrentPosition, Timestamp = Stopwatch.GetTimestamp() });
             }
             else
             {
-                Trace("TraceEnteringFunctionDefinedInFile", ParserStrings.TraceEnteringFunctionDefinedInFile, methodName, functionContext._file);
+                var methodName = functionContext._functionName;
+                if (string.IsNullOrEmpty(functionContext._file))
+                {
+                    Trace("TraceEnteringFunction", ParserStrings.TraceEnteringFunction, methodName);
+                }
+                else
+                {
+                    Trace("TraceEnteringFunctionDefinedInFile", ParserStrings.TraceEnteringFunctionDefinedInFile, methodName, functionContext._file);
+                }
             }
         }
 
@@ -4154,6 +4195,11 @@ namespace System.Management.Automation
                 {
                     return;
                 }
+            }
+            
+            if (_context.PSDebugTraceLevel <2 && _context.PSDebugTraceCollection != null)
+            {
+                return;
             }
 
             // If the value is an IEnumerator, we don't attempt to get its string format via 'ToStringParser' method,

@@ -16,6 +16,7 @@ using System.Runtime.CompilerServices;
 using System.Security;
 
 using Microsoft.PowerShell;
+using Microsoft.PowerShell.Commands;
 using Microsoft.PowerShell.Commands.Internal.Format;
 
 namespace System.Management.Automation
@@ -87,6 +88,22 @@ namespace System.Management.Automation
         }
 
         private int _debugTraceLevel;
+
+        /// <summary>
+        /// The tracer to trace every debugged command.
+        /// </summary>
+        /// <value>True if tracing is turned on, false if it's turned off.</value>
+        internal IList<PSTraceLine> PSDebugTraceCollection
+        {
+            get
+            {
+                return _debugTraceVariable;
+            }
+
+            set { _debugTraceVariable = value; }
+        }
+
+        private IList<PSTraceLine> _debugTraceVariable;
 
         /// <summary>
         /// The step mode for the interpreter.
