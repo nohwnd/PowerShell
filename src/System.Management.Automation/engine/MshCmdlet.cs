@@ -364,6 +364,11 @@ namespace System.Management.Automation
         public System.EventHandler<LocationChangedEventArgs> LocationChangedAction { get; set; }
 
         /// <summary>
+        /// Gets or sets the action that is invoked everytime a command is invoked. 
+        /// </summary>
+        public System.EventHandler<DebuggerSequencePointHitEventArgs> DebuggerSequencePointHitAction { get; set; }
+
+        /// <summary>
         /// Returns the CmdletInfo object that corresponds to the name argument.
         /// </summary>
         /// <param name="commandName">The name of the cmdlet to look for.</param>
@@ -1008,5 +1013,7 @@ namespace System.Management.Automation
         #endregion public members
 
     }
+
+
 }
 

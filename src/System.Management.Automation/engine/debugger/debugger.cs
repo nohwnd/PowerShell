@@ -1519,9 +1519,17 @@ namespace System.Management.Automation
 
         internal void OnSequencePointHit(FunctionContext functionContext)
         {
-            if (_context.ShouldTraceStatement && !_callStack.Last().IsFrameHidden && !functionContext._debuggerStepThrough)
+            if (!_callStack.Last().IsFrameHidden && !functionContext._debuggerStepThrough)
             {
-                TraceLine(functionContext.CurrentPosition);
+                if (_context.EngineIntrinsics.InvokeCommand.DebuggerSequencePointHitAction != null && !_invokingDebuggerSequencePointHitAction)
+                {
+                    InvokeDebuggerSequencePointHitAction(functionContext);
+                }
+
+                if (_context.ShouldTraceStatement)
+                {
+                    TraceLine(functionContext.CurrentPosition);
+                }
             }
 
             // If a nested debugger received a stop debug command then all debugging
@@ -1565,6 +1573,31 @@ namespace System.Management.Automation
                         StopOnSequencePoint(functionContext, breakpoints);
                     }
                 }
+            }
+        }
+
+        private void InvokeDebuggerSequencePointHitAction(FunctionContext functionContext)
+        {
+            var action = _context.EngineIntrinsics.InvokeCommand.DebuggerSequencePointHitAction;
+            if (action == null || _invokingDebuggerSequencePointHitAction)
+            {
+                return;
+            }
+
+            try
+            {
+                // Do not invoke the action while we are already invoking it.
+                _invokingDebuggerSequencePointHitAction = true;
+                var eventArgs = new DebuggerSequencePointHitEventArgs(Stopwatch.GetTimestamp(), functionContext.CurrentPosition);
+                action.Invoke(this, eventArgs);
+            }
+            catch
+            {
+                // ignore user code failures
+            }
+            finally
+            {
+                _invokingDebuggerSequencePointHitAction = false;
             }
         }
 
@@ -4071,6 +4104,7 @@ namespace System.Management.Automation
         }
 
         private bool _savedIgnoreScriptDebug = false;
+        private bool _invokingDebuggerSequencePointHitAction;
 
         internal void Trace(string messageId, string resourceString, params object[] args)
         {
@@ -4153,6 +4187,21 @@ namespace System.Management.Automation
 
         #endregion Tracing
     }
+
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
+    public class DebuggerSequencePointHitEventArgs
+    {
+        public long TimeStamp { get; }
+        public IScriptExtent Extent { get;  }
+
+        public DebuggerSequencePointHitEventArgs(long timestamp, IScriptExtent currentPosition)
+        {
+            TimeStamp = timestamp;
+            Extent = currentPosition;
+        }
+    }
+#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
+
 
     #endregion
 
