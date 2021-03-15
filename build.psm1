@@ -271,6 +271,7 @@ function Start-PSBuild {
         [Parameter(ParameterSetName="Default")]
         [switch]$NoPSModuleRestore,
         [switch]$CI,
+        [switch]$ForMinimalSize,
 
         # Skips the step where the pwsh that's been built is used to create a configuration
         # Useful when changing parsing/compilation, since bugs there can mean we can't get past this step
@@ -289,6 +290,7 @@ function Start-PSBuild {
                      "linux-arm",
                      "linux-arm64",
                      "linux-x64",
+                     "osx-arm64",
                      "osx-x64",
                      "win-arm",
                      "win-arm64",
@@ -320,6 +322,17 @@ function Start-PSBuild {
     if ("win-arm","win-arm64" -contains $Runtime -and -not $environment.IsWindows) {
         throw "Cross compiling for win-arm or win-arm64 is only supported on Windows environment"
     }
+
+    if ($ForMinimalSize) {
+        if ($CrossGen) {
+            throw "Build for the minimal size requires the minimal disk footprint, so `CrossGen` is not allowed"
+        }
+
+        if ($Runtime -and "linux-x64", "win7-x64", "osx-x64" -notcontains $Runtime) {
+            throw "Build for the minimal size is enabled only for following runtimes: 'linux-x64', 'win7-x64', 'osx-x64'"
+        }
+    }
+
     function Stop-DevPowerShell {
         Get-Process pwsh* |
             Where-Object {
@@ -389,6 +402,7 @@ Fix steps:
         Verbose=$true
         SMAOnly=[bool]$SMAOnly
         PSModuleRestore=$PSModuleRestore
+        ForMinimalSize=$ForMinimalSize
     }
     $script:Options = New-PSOptions @OptionsArguments
 
@@ -413,7 +427,7 @@ Fix steps:
     # Framework Dependent builds do not support ReadyToRun as it needs a specific runtime to optimize for.
     # The property is set in Powershell.Common.props file.
     # We override the property through the build command line.
-    if($Options.Runtime -like 'fxdependent*') {
+    if($Options.Runtime -like 'fxdependent*' -or $ForMinimalSize) {
         $Arguments += "/property:PublishReadyToRun=false"
     }
 
@@ -466,18 +480,21 @@ Fix steps:
         Push-Location $Options.Top
 
         if ($Options.Runtime -notlike 'fxdependent*') {
-            if ($Options.Runtime -like 'win-arm*') {
-                $Arguments += "/property:SDKToUse=Microsoft.NET.Sdk"
-            } else {
-                $Arguments += "/property:SDKToUse=Microsoft.NET.Sdk.WindowsDesktop"
+            $sdkToUse = 'Microsoft.NET.Sdk'
+            if ($Options.Runtime -like 'win7-*' -and !$ForMinimalSize) {
+                ## WPF/WinForm and the PowerShell GraphicalHost assemblies are included
+                ## when 'Microsoft.NET.Sdk.WindowsDesktop' is used.
+                $sdkToUse = 'Microsoft.NET.Sdk.WindowsDesktop'
             }
+
+            $Arguments += "/property:SDKToUse=$sdkToUse"
 
             Write-Log -message "Run dotnet $Arguments from $PWD"
             Start-NativeExecution { dotnet $Arguments }
             Write-Log -message "PowerShell output: $($Options.Output)"
 
             if ($CrossGen) {
-                ## fxdependent package cannot be CrossGen'ed
+                # fxdependent package cannot be CrossGen'ed
                 Start-CrossGen -PublishPath $publishPath -Runtime $script:Options.Runtime
                 Write-Log -message "pwsh.exe with ngen binaries is available at: $($Options.Output)"
             }
@@ -650,14 +667,14 @@ function Restore-PSPackage
 
     if ($Force -or (-not (Test-Path "$($Options.Top)/obj/project.assets.json"))) {
 
-        $sdkToUse = if (($Options.Runtime -eq 'fxdependent-win-desktop' -or $Options.Runtime -like 'win*')) { # this is fxd or some windows runtime
-            if ($Options.Runtime -like 'win-arm*') {
-                'Microsoft.NET.Sdk'
-            } else {
-                'Microsoft.NET.Sdk.WindowsDesktop'
+        if ($Options.Runtime -eq 'fxdependent-win-desktop') {
+            $sdkToUse = 'Microsoft.NET.Sdk.WindowsDesktop'
+        }
+        else {
+            $sdkToUse = 'Microsoft.NET.Sdk'
+            if ($Options.Runtime -like 'win7-*' -and !$Options.ForMinimalSize) {
+                $sdkToUse = 'Microsoft.NET.Sdk.WindowsDesktop'
             }
-        } else {
-            'Microsoft.NET.Sdk'
         }
 
         if ($PSModule.IsPresent) {
@@ -765,6 +782,7 @@ function New-PSOptions {
                      "linux-arm",
                      "linux-arm64",
                      "linux-x64",
+                     "osx-arm64",
                      "osx-x64",
                      "win-arm",
                      "win-arm64",
@@ -782,7 +800,9 @@ function New-PSOptions {
 
         [switch]$SMAOnly,
 
-        [switch]$PSModuleRestore
+        [switch]$PSModuleRestore,
+
+        [switch]$ForMinimalSize
     )
 
     # Add .NET CLI tools to PATH
@@ -799,7 +819,12 @@ function New-PSOptions {
         if ($environment.IsLinux) {
             $Runtime = "linux-x64"
         } elseif ($environment.IsMacOS) {
-            $Runtime = "osx-x64"
+            if ($PSVersionTable.OS.Contains('ARM64')) {
+                $Runtime = "osx-arm64"
+            }
+            else {
+                $Runtime = "osx-x64"
+            }
         } else {
             $RID = dotnet --info | ForEach-Object {
                 if ($_ -match "RID") {
@@ -876,7 +901,8 @@ function New-PSOptions {
                 -Configuration $Configuration `
                 -PSModuleRestore $PSModuleRestore.IsPresent `
                 -Framework $Framework `
-                -Output $Output
+                -Output $Output `
+                -ForMinimalSize $ForMinimalSize
 }
 
 # Get the Options of the last build
@@ -2263,6 +2289,7 @@ function Start-CrossGen {
                      "linux-arm",
                      "linux-arm64",
                      "linux-x64",
+                     "osx-arm64",
                      "osx-x64",
                      "win-arm",
                      "win-arm64",
@@ -2386,6 +2413,7 @@ function Start-CrossGen {
     $crossGenPath = Get-ChildItem $script:Environment.nugetPackagesRoot $crossGenExe -Recurse | `
                         Where-Object { $_.FullName -match $crossGenRuntime } | `
                         Where-Object { $_.FullName -match $dotnetRuntimeVersion } | `
+                        Where-Object { (Split-Path $_.FullName -Parent).EndsWith('tools') } | `
                         Sort-Object -Property FullName -Descending | `
                         Select-Object -First 1 | `
                         ForEach-Object { $_.FullName }
@@ -3009,7 +3037,8 @@ function Restore-PSOptions {
                     -Configuration $options.Configuration `
                     -PSModuleRestore $options.PSModuleRestore `
                     -Framework $options.Framework `
-                    -Output $options.Output
+                    -Output $options.Output `
+                    -ForMinimalSize $options.ForMinimalSize
 
     Set-PSOptions -Options $newOptions
 }
@@ -3046,7 +3075,11 @@ function New-PSOptionsObject
 
         [Parameter(Mandatory)]
         [String]
-        $Output
+        $Output,
+
+        [Parameter(Mandatory)]
+        [Bool]
+        $ForMinimalSize
     )
 
     return @{
@@ -3058,6 +3091,7 @@ function New-PSOptionsObject
         Output = $Output
         CrossGen = $CrossGen
         PSModuleRestore = $PSModuleRestore
+        ForMinimalSize = $ForMinimalSize
     }
 }
 
