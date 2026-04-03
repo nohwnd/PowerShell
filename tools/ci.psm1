@@ -659,14 +659,18 @@ function Invoke-CIFinish
                 $env:PSMsiRuntime = $Runtime
 
                 # Install the latest Pester and import it
-                $maximumPesterVersion = '4.99'
-                Install-CIPester -MinimumVersion '4.0.0' -MaximumVersion $maximumPesterVersion -Force
-                Import-Module Pester -Force -MaximumVersion $maximumPesterVersion
+                $minimumPesterVersion = '5.0'
+                Install-CIPester -MinimumVersion $minimumPesterVersion -Force
+                Import-Module Pester -Force -MinimumVersion $minimumPesterVersion
 
                 $testResultPath = Join-Path -Path $env:TEMP -ChildPath "win-package-$channel-$runtime.xml"
 
                 # start the packaging tests and get the results
-                $packagingTestResult = Invoke-Pester -Script (Join-Path $repoRoot '.\test\packaging\windows\') -PassThru -OutputFormat NUnitXml -OutputFile $testResultPath
+                $pesterConfig = [PesterConfiguration]@{
+                    Run = @{ Path = (Join-Path $repoRoot '.\test\packaging\windows\'); PassThru = $true }
+                    TestResult = @{ Enabled = $true; OutputPath = $testResultPath; OutputFormat = 'NUnitXml' }
+                }
+                $packagingTestResult = Invoke-Pester -Configuration $pesterConfig
 
                 Publish-TestResults -Title "win-package-$channel-$runtime" -Path $testResultPath
 

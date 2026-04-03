@@ -65,6 +65,7 @@ Describe "Send-MailMessage DRT Unit Tests" -Tags CI, RequireSudoOnUnix {
         }
     }
 
+    BeforeDiscovery {
     $testCases = @(
         @{
             Name = "with mandatory parameters"
@@ -123,6 +124,7 @@ Describe "Send-MailMessage DRT Unit Tests" -Tags CI, RequireSudoOnUnix {
             }
         }
     )
+    }
 
     It "Shows obsolete message for cmdlet" -skip:$script:SkipTest {
         $server | Should -Not -Be $null
@@ -174,7 +176,7 @@ Describe "Send-MailMessage DRT Unit Tests" -Tags CI, RequireSudoOnUnix {
     It "Can send mail message using pipline named parameters <Name>" -TestCases $testCases -skip:$script:SkipTest {
         param($InputObject)
 
-        Set-TestInconclusive "As of right now the Send-MailMessage cmdlet does not support piping named parameters (see issue 7591)"
+        Set-ItResult -Inconclusive -Because "As of right now the Send-MailMessage cmdlet does not support piping named parameters (see issue 7591)"
 
         $server | Should -Not -Be $null
 

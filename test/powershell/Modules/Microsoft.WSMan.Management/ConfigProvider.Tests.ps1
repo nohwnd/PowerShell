@@ -36,6 +36,7 @@ Describe "WSMan Config Provider" -Tag Feature,RequireAdminOnWindows {
         }
     }
 
+    BeforeAll {
     Function Test-Plugin($plugin, $expectedMissingProperties, $expectedMissingAttributes) {
         $plugin.PSPath | Should -Exist
         $testPluginXml = [xml](winrm g winrm/config/plugin?name=$($plugin.Name) -format:xml)
@@ -48,6 +49,7 @@ Describe "WSMan Config Provider" -Tag Feature,RequireAdminOnWindows {
                 (Get-Item "$($plugin.PSPath)\$($pluginProperty.Name)").Value | Should -Be $testPluginXml.PluginConfiguration.$($pluginProperty.Name)
             }
         }
+    }
     }
 
     AfterEach {

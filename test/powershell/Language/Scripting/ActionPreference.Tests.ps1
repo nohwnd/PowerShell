@@ -2,6 +2,7 @@
 # Licensed under the MIT License.
 
 Describe "Tests for (error, warning, etc) action preference" -Tags "CI" {
+    BeforeDiscovery {
     $commonActionPreferenceParameterTestCases = foreach ($commonParameterName in [System.Management.Automation.Cmdlet]::CommonParameters | Select-String Action) {
         @{
             ActionPreferenceParameterName = $commonParameterName
@@ -25,6 +26,7 @@ Describe "Tests for (error, warning, etc) action preference" -Tags "CI" {
             DisplayValue = '''Suspend'''
         }
     )
+    }
 
     BeforeAll {
         $orgin = $GLOBAL:errorActionPreference
@@ -71,10 +73,12 @@ Describe "Tests for (error, warning, etc) action preference" -Tags "CI" {
     }
 
     Context 'Setting ErrorActionPreference to stop prevents user from getting the error exception' {
+        BeforeAll {
         $err = $null
         try {
             Get-ChildItem nosuchfile.nosuchextension -ErrorAction stop -ErrorVariable err
         } catch { }
+        }
 
         It '$err.Count' { $err.Count | Should -Be 1 }
         It '$err[0] should not be $null' { $err[0] | Should -Not -BeNullOrEmpty }

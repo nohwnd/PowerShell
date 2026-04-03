@@ -715,6 +715,7 @@ foo``u{2195}abc
     }
 
     Context "Boolean Tests (starting at line 1723 to line 1772)" {
+        BeforeDiscovery {
         $testData = @(
             @{ Script = '"False"'; Expected = $true }
             @{ Script = 'if ("A") { $true } else { $false }'; Expected = $true }
@@ -726,6 +727,7 @@ foo``u{2195}abc
             @{ Script = '$a = $(0);if ($a) { $true } else { $false }'; Expected = $false }
             @{ Script = '$obj = testcmd-parserBVT -ReturnType object;if ($obj) { $true } else { $false }'; Expected = $true }
         )
+        }
         It "<Script> should return <Expected>" -TestCases $testData {
             param ( $Script, $Expected )
             ExecuteCommand $Script | Should -Be $Expected
@@ -733,6 +735,7 @@ foo``u{2195}abc
     }
 
     Context "Comparison operator Tests (starting at line 1785 to line 1842)" {
+        BeforeDiscovery {
         $testData = @(
             @{ Script = 'if (1 -and 1) { $true } else { $false }'; Expected = $true }
             @{ Script = 'if (1 -and 0) { $true } else { $false }'; Expected = $false }
@@ -766,6 +769,7 @@ foo``u{2195}abc
             #!
             @{ Script = 'if (!$true -and $false) { $true } else { $false }'; Expected = $false }
         )
+        }
         It "<Script> should return <Expected>" -TestCases $testData {
             param ( $Script, $Expected )
             ExecuteCommand $Script | Should -Be $Expected
@@ -773,6 +777,7 @@ foo``u{2195}abc
     }
 
     Context "Arithmetic and String Comparison Tests (starting at line 1848 to line 1943)" {
+        BeforeDiscovery {
         $testData = @(
             @{ Script = '$a=10; if( !$a -eq 10) { $a=1 } else {$a=2};$a'; Expected = 2 }
             @{ Script = "!3"; Expected = $false }
@@ -797,6 +802,7 @@ foo``u{2195}abc
             @{ Script = '$a="abc"; if($a -ile "bbc") { $a=1 } else {$a=2};$a'; Expected = 1 }
             @{ Script = "'aaa' -ile 'AAA'"; Expected = $true }
         )
+        }
         It "<Script> should return <Expected>" -TestCases $testData {
             param ( $Script, $Expected )
             ExecuteCommand $Script | Should -Be $Expected
@@ -804,6 +810,7 @@ foo``u{2195}abc
     }
 
     Context "Comparison Operators with Arrays Tests (starting at line 2015 to line 2178)" {
+        BeforeDiscovery {
         $testData = @(
             @{ Script = "@(3) -eq 3"; Expected = "3" }
             @{ Script = "@(4) -eq 3"; Expected = $null }
@@ -812,6 +819,7 @@ foo``u{2195}abc
             @{ Script = '$test = 1,2,@(3,4);$test -eq 2'; Expected = "2" }
             @{ Script = '$test = 1,2,@(3,4);$test -eq 0'; Expected = $null }
         )
+        }
         It "<Script> should return <Expected>" -TestCases $testData {
             param ( $Script, $Expected )
             ExecuteCommand $Script | Should -Be $Expected
@@ -836,6 +844,7 @@ foo``u{2195}abc
     }
 
     Context "Numerical Notations Tests (starting at line 2374 to line 2452)" {
+        BeforeDiscovery {
         $testData = @(
             #Standard numeric notation
             #Standard
@@ -1141,6 +1150,7 @@ foo``u{2195}abc
             @{ Script = "1ultb"; ExpectedValue = "1099511627776"; ExpectedType = [ulong] }
             @{ Script = "1ulpb"; ExpectedValue = "1125899906842624"; ExpectedType = [ulong] }
         )
+        }
 
         It "<Script> should return <ExpectedValue>, with type <ExpectedType>" -TestCases $testData {
             param ( $Script, $ExpectedValue, $ExpectedType )
@@ -1148,6 +1158,7 @@ foo``u{2195}abc
             ExecuteCommand $Script | Should -BeOfType $ExpectedType
         }
 
+        BeforeDiscovery {
         $testInvalidNumerals = @(
             @{ Script = "16p"; ErrorID = "CommandNotFoundException" }
             @{ Script = "1_6"; ErrorID = "CommandNotFoundException" }
@@ -1180,6 +1191,7 @@ foo``u{2195}abc
             @{ Script = "1uykb"; ErrorID = "ParseException" }
             @{ Script = "10_000ul"; ErrorID = "CommandNotFoundException" }
         )
+        }
 
         It "<Script> should throw an error" -TestCases $testInvalidNumerals {
             param($Script, $ErrorID)
@@ -1260,6 +1272,7 @@ foo``u{2195}abc
     }
 
     Context "Mathematical Operations Tests (starting at line 2975 to line 3036)" {
+        BeforeDiscovery {
         $ArithmeticTests = @(
             @{
                 Script   = '$a=6; $a -= 2;$a'
@@ -1280,6 +1293,7 @@ foo``u{2195}abc
                 Expected = "2"
             }
         )
+        }
         It "<Script> should return <Expected>" -TestCases $ArithmeticTests {
             param ( $Script, $Expected )
 
@@ -1301,11 +1315,13 @@ foo``u{2195}abc
         { ExecuteCommand "`$herestr=@`"`n'`"'`n`"@" } | Should -Not -Throw
     }
 
+    BeforeDiscovery {
     $TestErrorMisplacedStatement = @(
         @{ script = "Function foo { [CmdletBinding()] param() DynamicParam {} Hi"; name = "function" }
         @{ script = "{ begin {} Hi"; name = "script-block" }
         @{ script = "begin {} Hi"; name = "script-file" }
     )
+    }
     It "Throw better error when statement should be put in named blocks - <name>" -TestCases $TestErrorMisplacedStatement {
         param($script)
 
@@ -1334,12 +1350,14 @@ foo``u{2195}abc
             $ps.Commands.Clear()
         }
 
+        BeforeDiscovery {
         $TokenResetTests = @(
             @{ script = "#requires"; firstToken = $null; lastToken = $null },
             @{ script = "#requires -Version 5.0`n10"; firstToken = "10"; lastToken = "10" },
             @{ script = "Write-Host 'Hello'`n#requires -Version 5.0`n7"; firstToken = "Write-Host"; lastToken = "7" },
             @{ script = "Write-Host 'Hello'`n#requires -Version 5.0"; firstToken = "Write-Host"; lastToken = "Hello" }
         )
+        }
 
         It "Correctly resets the first and last tokens in the tokenizer after nested scan in script" -TestCases $TokenResetTests {
             param($script, $firstToken, $lastToken)

@@ -13,11 +13,13 @@ def=content of def
 }
 
 Describe "ConvertFrom-StringData" -Tags "CI" {
+    BeforeAll {
     $sampleData = @'
 foo  = 0
 bar  = 1
 bazz = 2
 '@
+    }
 
     It "Should not throw when called with just the stringdata switch" {
 	{ ConvertFrom-StringData -StringData 'a=b' } | Should -Not -Throw

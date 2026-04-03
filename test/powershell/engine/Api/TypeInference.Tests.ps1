@@ -1209,6 +1209,7 @@ Describe "Type inference Tests" -tags "CI" {
         $res.Name | Should -Be System.Guid
     }
 
+    BeforeDiscovery {
     $catchClauseTypes = @(
         @{ Type = 'System.ArgumentException' }
         @{ Type = 'System.ArgumentNullException' }
@@ -1235,6 +1236,7 @@ Describe "Type inference Tests" -tags "CI" {
         @{ Type = 'System.TimeoutException' }
         @{ Type = 'System.UriFormatException' }
     )
+    }
 
     It 'Infers type of $_.Exception in [<Type>] typed catch block' -TestCases $catchClauseTypes {
         param($Type)

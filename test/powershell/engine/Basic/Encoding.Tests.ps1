@@ -49,7 +49,7 @@ Describe "File encoding tests" -Tag CI {
             param ( $Command, $parameters, $Expected, $Operator)
             & $command @parameters
             $bytes = Get-FileBytes $outputFile
-            $bytes -join "-" | Should ${Operator} ($Expected -join "-")
+            $bytes -join "-" | Should -${Operator} ($Expected -join "-")
         }
 
         It "Export-CSV creates file with UTF-8 encoding without BOM" {

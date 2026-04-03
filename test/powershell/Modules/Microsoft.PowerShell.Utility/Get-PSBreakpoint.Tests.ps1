@@ -2,8 +2,10 @@
 # Licensed under the MIT License.
 Describe "Get-PSBreakpoint" -Tags "CI" {
 
+    BeforeAll {
     $scriptName = "Get-PSBreakpoint.Tests.ps1"
     $fullScriptPath = Join-Path -Path $PSScriptRoot -ChildPath $scriptName
+    }
 
     AfterEach {
         Get-PSBreakpoint -Script $fullScriptPath | Remove-PSBreakpoint
@@ -32,4 +34,3 @@ Describe "Get-PSBreakpoint" -Tags "CI" {
 
     }
 }
-

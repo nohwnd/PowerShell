@@ -143,6 +143,7 @@ namespace TestTypeResolution {
 }
 
 Describe 'method conversion' -Tags 'CI' {
+    BeforeAll {
     class M {
         [int] Twice([int] $value) { return 2 * $value }
         [int] ThriceInstance([int] $value) { return 3 * $value }
@@ -230,6 +231,7 @@ Describe 'method conversion' -Tags 'CI' {
         static [timespan] Foo([timespan] $i, [timespan] $j, [timespan] $k, [timespan] $l, [timespan] $m, [timespan] $n) { return $i }
         static [timespan] Foo([timespan] $i, [timespan] $j, [timespan] $k, [timespan] $l, [timespan] $m, [timespan] $n, [timespan] $o) { return $i }
         static [timespan] Foo([timespan] $i, [timespan] $j, [timespan] $k, [timespan] $l, [timespan] $m, [timespan] $n, [timespan] $o, [timespan] $p) { return $i }
+    }
     }
 
     It 'converts static method as Func does not throw' {
@@ -409,6 +411,7 @@ Describe 'method conversion' -Tags 'CI' {
         $f72.Invoke($timeSpan, [Timespan]::Zero, [Timespan]::Zero, [Timespan]::Zero, [Timespan]::Zero, [Timespan]::Zero, [Timespan]::Zero, [Timespan]::Zero) | Should -Be $timeSpan
     }
 
+    BeforeAll {
     enum E {
         Day;
         Week;
@@ -449,6 +452,7 @@ Describe 'method conversion' -Tags 'CI' {
 
         ## Test enum parameter type
         [object] GetC([E] $e) { return $e.ToString() }
+    }
     }
 
     It "Different method overloads with same signatures/orders should have same PSMethod type" {
@@ -499,6 +503,7 @@ Describe 'method conversion' -Tags 'CI' {
         { [System.Management.Automation.LanguagePrimitives]::ConvertTo($n.GetC, [Func[[int], [object]]]) } | Should -Throw -ErrorId "PSInvalidCastException"
     }
 
+    BeforeDiscovery {
     $TestCases = @(
         @{ Number = "100y"; Value = "100"; Type = [int] }
         @{ Number = "100uy"; Value = "100"; Type = [double] }
@@ -511,6 +516,7 @@ Describe 'method conversion' -Tags 'CI' {
         @{ Number = "100n"; Value = "100"; Type = [int] }
         @{ Number = "1234s"; Value = "1234"; Type = [bigint] }
     )
+    }
     It "Correctly casts <Number> to value <Value> as type <Type>" -TestCases $TestCases {
         param($Number, $Value, $Type)
 
@@ -519,12 +525,14 @@ Describe 'method conversion' -Tags 'CI' {
         $Result | Should -BeOfType $Type
     }
 
+    BeforeDiscovery {
     $TestCases = @(
         @{ Number = "200y" }
         @{ Number = "300uy" }
         @{ Number = "70000us" }
         @{ Number = "40000s" }
     )
+    }
     It "Fails to cast invalid PowerShell-Style suffixed numeral <Number>" -TestCases $TestCases {
         param($Number)
 

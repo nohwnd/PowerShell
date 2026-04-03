@@ -101,10 +101,15 @@ Describe "Validate that get-help works for CurrentUserScope" -Tags @('CI') {
             $cmdlets = Get-Command -Module $moduleName
         }
 
+        BeforeDiscovery {
         $testCases = @()
 
         ## Just testing first 3 in CI, Feature tests validate full list.
         $cmdlets | Where-Object { $script:cmdletsToSkip -notcontains $_ } | Select-Object -First 3 | ForEach-Object { $testCases += @{ cmdletName = $_.Name }}
+        }
+        BeforeAll {
+        $testCases = @()
+        }
 
         It "Validate -Description and -Examples sections in help content. Run 'Get-help -name <cmdletName>" -TestCases $testCases {
             param($cmdletName)
@@ -156,8 +161,13 @@ Describe "Validate that get-help works for AllUsers Scope" -Tags @('Feature', 'R
             $cmdlets = Get-Command -Module $moduleName
         }
 
+        BeforeDiscovery {
         $testCases = @()
         $cmdlets | Where-Object { $cmdletsToSkip -notcontains $_ } | ForEach-Object { $testCases += @{ cmdletName = $_.Name }}
+        }
+        BeforeAll {
+        $testCases = @()
+        }
 
         It "Validate -Description and -Examples sections in help content. Run 'Get-help -name <cmdletName>" -TestCases $testCases -Skip:(!(Test-CanWriteToPsHome)) {
             param($cmdletName)
@@ -351,12 +361,14 @@ Describe "Get-Help should find pattern help files" -Tags "CI" {
         $env:PSModulePath = $currentPSModulePath
     }
 
+    BeforeDiscovery {
     $testcases = @(
         @{command = {Get-Help about_testCas?1}; testname = "test ? pattern"; result = "about_test1"}
         @{command = {Get-Help about_testCase.?}; testname = "test ? pattern with dot"; result = "about_test2"}
         @{command = {(Get-Help about_testCase*).Count}; testname = "test * pattern"; result = "2"}
         @{command = {Get-Help about_testCas?.2*}; testname = "test ?, * pattern with dot"; result = "about_test2"}
     )
+    }
 
     It "Get-Help should find pattern help files - <testname>" -TestCases $testcases {
         param (

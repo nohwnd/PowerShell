@@ -129,6 +129,7 @@ Describe "Compare-Object" -Tags "CI" {
 }
 
 Describe "Compare-Object DRT basic functionality" -Tags "CI" {
+		BeforeAll {
 		if(-not ([System.Management.Automation.PSTypeName]'Employee').Type)
 		{
 			Add-Type -TypeDefinition @"
@@ -222,6 +223,7 @@ Describe "Compare-Object DRT basic functionality" -Tags "CI" {
     }
 "@
 	}
+		}
 	It "Compare-Object with 1 referenceObject and 1 differenceObject should work"{
 		$empsReference = @([EmployeeComparable]::New("john","smith",5))
 		$empsDifference = @([EmployeeComparable]::New("mary","jane",5))

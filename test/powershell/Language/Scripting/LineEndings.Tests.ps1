@@ -13,6 +13,7 @@ Describe 'Line endings' -Tags "CI" {
         $hereSE = "'@"
         }
 
+    BeforeAll {
     $testData = @(
         @{
             Name = 'CR in single quotes here-string';
@@ -105,6 +106,7 @@ Describe 'Line endings' -Tags "CI" {
             End =  $dq
         }
     )
+    }
 
     It '<Name> in expression' -TestCases:$testData {
         param([string]$Name, $Begin, $End, $NewLine)

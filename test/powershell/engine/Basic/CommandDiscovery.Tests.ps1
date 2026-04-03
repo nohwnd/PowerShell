@@ -4,8 +4,8 @@
 Describe "Command Discovery tests" -Tags "CI" {
 
     BeforeAll {
-        Setup -f testscript.ps1 -Content "'This script should not run. Running from testscript.ps1'"
-        Setup -f testscripp.ps1 -Content "'This script should not run. Running from testscripp.ps1'"
+        Set-Content -Path (Join-Path $TestDrive 'testscript.ps1') -Value "'This script should not run. Running from testscript.ps1'"
+        Set-Content -Path (Join-Path $TestDrive 'testscripp.ps1') -Value "'This script should not run. Running from testscripp.ps1'"
 
         $TestCasesCommandNotFound = @(
                         @{command = 'CommandThatDoesnotExist' ; testName = 'Non-existent command'}
@@ -94,17 +94,17 @@ Describe "Command Discovery tests" -Tags "CI" {
             $firstResult = "executing $firstFileName in root"
             $secondResult = "executing $secondFileName in root"
             $thirdResult = "executing $thirdFileName in root"
-            Setup -f $firstFileName -Content "'$firstResult'"
-            Setup -f $secondFileName -Content "'$secondResult'"
-            Setup -f $thirdFileName -Content "'$thirdResult'"
+            Set-Content -Path (Join-Path $TestDrive '$firstFileName') -Value "'$firstResult'"
+            Set-Content -Path (Join-Path $TestDrive '$secondFileName') -Value "'$secondResult'"
+            Set-Content -Path (Join-Path $TestDrive '$thirdFileName') -Value "'$thirdResult'"
 
             $subFolder = 'subFolder'
             $firstFileInSubFolder = Join-Path $subFolder -ChildPath $firstFileName
             $secondFileInSubFolder = Join-Path $subFolder -ChildPath $secondFileName
             $thirdFileInSubFolder = Join-Path $subFolder -ChildPath $thirdFileName
-            Setup -f $firstFileInSubFolder -Content "'$firstResult'"
-            Setup -f $secondFileInSubFolder -Content "'$secondResult'"
-            Setup -f $thirdFileInSubFolder -Content "'$thirdResult'"
+            Set-Content -Path (Join-Path $TestDrive '$firstFileInSubFolder') -Value "'$firstResult'"
+            Set-Content -Path (Join-Path $TestDrive '$secondFileInSubFolder') -Value "'$secondResult'"
+            Set-Content -Path (Join-Path $TestDrive '$thirdFileInSubFolder') -Value "'$thirdResult'"
 
             $secondFileSearchInSubfolder = (Join-Path -Path $subFolder -ChildPath '[t1].ps1')
 
@@ -154,7 +154,7 @@ Describe "Command Discovery tests" -Tags "CI" {
 
             if($Pending)
             {
-                Set-TestInconclusive -Message $Pending
+                Set-ItResult -Inconclusive -Because $Pending
             }
 
             & $command | Should -BeExactly $expectedResult
@@ -176,9 +176,9 @@ Describe "Command Discovery tests" -Tags "CI" {
             $firstResult = '[first script]'
             $secondResult = 'alt script'
             $thirdResult = 'bad script'
-            Setup -f '[test1].ps1' -Content "'$firstResult'"
-            Setup -f '1.ps1' -Content "'$secondResult'"
-            Setup -f '2.ps1' -Content "'$thirdResult'"
+            Set-Content -Path (Join-Path $TestDrive '[test1].ps1') -Value "'$firstResult'"
+            Set-Content -Path (Join-Path $TestDrive '1.ps1') -Value "'$secondResult'"
+            Set-Content -Path (Join-Path $TestDrive '2.ps1') -Value "'$thirdResult'"
 
             $gcmWithWildcardCases = @(
                 @{command = '.\?[tb]est1?.ps1'; expectedCommand = '[test1].ps1'; expectedCommandCount =1; name = '''.\?[tb]est1?.ps1'''}

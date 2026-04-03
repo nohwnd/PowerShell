@@ -68,6 +68,7 @@ Describe "Tests Get-Command with relative paths and wildcards" -Tag "CI" {
         $propertiesAsString | Should -MatchExactly 'ParameterSets'
     }
 
+    BeforeDiscovery {
     $testcases = @(
                   @{observed = $commandInfo.Name; testname = "Name"; result = "Get-Date"}
                   @{observed = $commandInfo.ModuleName; testname = "Name"; result = "Microsoft.PowerShell.Utility"}
@@ -75,6 +76,7 @@ Describe "Tests Get-Command with relative paths and wildcards" -Tag "CI" {
                   @{observed = $commandInfo.CommandType; testname = "CommandType"; result = "Cmdlet"}
                   @{observed = $commandInfo.Definition.Count; testname = "Definition"; result = 1}
                )
+    }
 
     It "Get-Command -ShowCommandInfo property test - <testname>" -TestCases $testcases{
             param (

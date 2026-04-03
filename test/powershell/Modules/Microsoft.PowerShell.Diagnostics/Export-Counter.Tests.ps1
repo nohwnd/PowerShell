@@ -118,6 +118,7 @@ Describe "CI tests for Export-Counter cmdlet" -Tags "CI" {
         $script:outputDirectory = $testDrive
     }
 
+    BeforeAll {
     $testCases = @(
         @{
             Name = "Can export BLG format"
@@ -136,6 +137,7 @@ Describe "CI tests for Export-Counter cmdlet" -Tags "CI" {
     {
         RunTest $testCase
     }
+    }
 }
 
 Describe "Feature tests for Export-Counter cmdlet" -Tags "Feature" {
@@ -145,6 +147,7 @@ Describe "Feature tests for Export-Counter cmdlet" -Tags "Feature" {
     }
 
     Context "Validate incorrect parameter usage" {
+        BeforeAll {
         $testCases = @(
             @{
                 Name = "Fails when given invalid path"
@@ -182,9 +185,11 @@ Describe "Feature tests for Export-Counter cmdlet" -Tags "Feature" {
         {
             RunTest $testCase
         }
+        }
     }
 
     Context "Export tests" {
+        BeforeAll {
         $testCases = @(
             @{
                 Name = "Fails when output file exists"
@@ -224,6 +229,7 @@ Describe "Feature tests for Export-Counter cmdlet" -Tags "Feature" {
         foreach ($testCase in $testCases)
         {
             RunTest $testCase
+        }
         }
     }
 }

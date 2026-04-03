@@ -21,6 +21,7 @@ Describe "New-TimeSpan" -Tags "CI" {
     }
 
     Context "Core Functionality Tests" {
+	BeforeAll {
 	New-Variable -Name testObject -Value $(New-TimeSpan -Days 2 -Hours 23 -Minutes 4 -Seconds 3 -Milliseconds 2) -Force
 
 	$expectedOutput = @{ "Days"              = "2";
@@ -37,6 +38,7 @@ Describe "New-TimeSpan" -Tags "CI" {
 			   }
 
 	$TEN_MILLION = 10000000
+	}
 
 	It "Should have expected values for time properties set during creation" {
 	    $testObject.Days         | Should -Be $expectedOutput["Days"]

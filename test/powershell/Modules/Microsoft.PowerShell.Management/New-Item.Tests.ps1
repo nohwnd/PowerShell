@@ -32,6 +32,7 @@ function Clean-State
 }
 
 Describe "New-Item" -Tags "CI" {
+    BeforeAll {
     $tmpDirectory               = $TestDrive
     $testfile                   = "testfile.txt"
     $testfolder                 = "newDirectory"
@@ -42,6 +43,7 @@ Describe "New-Item" -Tags "CI" {
     $FullyQualifiedLink         = Join-Path -Path $tmpDirectory -ChildPath $testlink
     $FullyQualifiedSubFolder    = Join-Path -Path $FullyQualifiedFolder -ChildPath $testsubfolder
     $FullyQualifiedFileInFolder = Join-Path -Path $FullyQualifiedFolder -ChildPath $testfile
+    }
 
 
     BeforeEach {
@@ -199,6 +201,7 @@ Describe "New-Item" -Tags "CI" {
 # In the default windows setup, Admin user has this priveledge, but regular users don't.
 
 Describe "New-Item with links" -Tags @('CI', 'RequireAdminOnWindows') {
+    BeforeAll {
     $tmpDirectory         = $TestDrive
     $testfile             = "testfile.txt"
     $testfolder           = "newDirectory"
@@ -208,6 +211,7 @@ Describe "New-Item with links" -Tags @('CI', 'RequireAdminOnWindows') {
     $FullyQualifiedLink   = Join-Path -Path $tmpDirectory -ChildPath $testlink
     $SymLinkMask          = [System.IO.FileAttributes]::ReparsePoint
     $DirLinkMask          = $SymLinkMask -bor [System.IO.FileAttributes]::Directory
+    }
 
     BeforeEach {
         Clean-State

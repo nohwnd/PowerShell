@@ -165,6 +165,7 @@ Describe "Test-ModuleManifest tests" -tags "CI" {
 
 Describe "Tests for circular references in required modules" -tags "CI" {
 
+    BeforeAll {
     function CreateTestModules([string]$RootPath, [string[]]$ModuleNames, [bool]$AddVersion, [bool]$AddGuid, [bool]$AddCircularReference)
     {
         $RequiredModulesSpecs = @();
@@ -237,6 +238,7 @@ Describe "Tests for circular references in required modules" -tags "CI" {
             Pop-Location
             Remove-Item $moduleRootPath -Recurse -Force -ErrorAction SilentlyContinue
         }
+    }
     }
 
     It "No circular references and RequiredModules field has only module names" {

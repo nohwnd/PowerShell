@@ -1,6 +1,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 Describe "Stream writer tests" -Tags "CI" {
+    BeforeAll {
     $targetfile = Join-Path -Path $TestDrive -ChildPath "writeoutput.txt"
 
     # A custom function is defined here do handle the debug stream dealing with the confirm prompt
@@ -15,6 +16,7 @@ Describe "Stream writer tests" -Tags "CI" {
 
         Write-Debug "Debug message"
 
+    }
     }
 
     Context "Redirect Stream Tests" {

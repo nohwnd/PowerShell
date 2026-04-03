@@ -54,6 +54,7 @@ Describe "CI Tests for Get-Counter cmdlet" -Tags "CI" {
 Describe "Feature tests for Get-Counter cmdlet" -Tags "Feature" {
 
     Context "Validate incorrect parameter usage" {
+        BeforeAll {
         $parameterTestCases = @(
             @{
                 Name = "Fails when MaxSamples parameter is < 1"
@@ -153,6 +154,7 @@ Describe "Feature tests for Get-Counter cmdlet" -Tags "Feature" {
         foreach ($testCase in $parameterTestCases)
         {
             ValidateParameters($testCase)
+        }
         }
     }
 

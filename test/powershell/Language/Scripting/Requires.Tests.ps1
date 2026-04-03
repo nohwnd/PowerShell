@@ -3,6 +3,7 @@
 Describe "Requires tests" -Tags "CI" {
     Context "Parser error" {
 
+        BeforeDiscovery {
         $testcases = @(
                         @{command = "#requiresappID`r`n`$foo = 1; `$foo" ; testname = "appId with newline"}
                         @{command = "#requires -version A `r`n`$foo = 1; `$foo" ; testname = "version as character"}
@@ -12,6 +13,7 @@ Describe "Requires tests" -Tags "CI" {
                         @{command = "#requires -version 1.0. `r`n`$foo = 1; `$foo" ; testname = "version with two dots"}
                         @{command = "#requires -version 1.A `r`n`$foo = 1; `$foo" ; testname = "alphanumeric version with dots"}
                     )
+        }
 
         It "throws ParserException - <testname>" -TestCases $testcases {
             param($command)

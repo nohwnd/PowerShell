@@ -245,12 +245,14 @@ Describe "SemanticVersion api tests" -Tags 'CI' {
     }
 
     Context "Serialization" {
+        BeforeDiscovery {
         $testCases = @(
             @{ errorId = "PSArgumentException"; expectedResult = "1.0.0"; semver = [SemanticVersion]::new(1, 0, 0) }
             @{ errorId = "PSArgumentException"; expectedResult = "1.0.1"; semver = [SemanticVersion]::new(1, 0, 1) }
             @{ errorId = "PSArgumentException"; expectedResult = "1.0.0-alpha"; semver = [SemanticVersion]::new(1, 0, 0, "alpha") }
             @{ errorId = "PSArgumentException"; expectedResult = "1.0.0-Alpha-super.3+BLD.a1-xxx.03"; semver = [SemanticVersion]::new(1, 0, 0, "Alpha-super.3+BLD.a1-xxx.03") }
         )
+        }
         It "Can round trip: <semver>" -TestCases $testCases {
             param($semver, $expectedResult)
 

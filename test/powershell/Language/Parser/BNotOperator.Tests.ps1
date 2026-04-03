@@ -67,6 +67,7 @@ Describe "bnot on integral types" -Tags "CI" {
     {
         Context $baseType.Name  {
 
+            BeforeAll {
             $max = $baseType::MaxValue
             $maxMinus1 = $max - 1
             $min = $baseType::MinValue
@@ -79,6 +80,7 @@ Describe "bnot on integral types" -Tags "CI" {
             else
             {
                 $expectedResultType = $baseType
+            }
             }
 
             if ($baseType -eq [byte] -or $baseType -eq [uint16])
@@ -138,4 +140,3 @@ Describe "bnot on integral types" -Tags "CI" {
         }
     }
 }
-

@@ -3,6 +3,7 @@
 Describe 'Misc Test' -Tags "CI" {
 
     Context 'Where' {
+        BeforeAll {
         class C1 {
         [int[]] $Wheels = @(1,2,3);
         [string] Foo() {
@@ -14,6 +15,7 @@ Describe 'Misc Test' -Tags "CI" {
              return (1..10 | Where-Object  { $PSItem -in $this.Wheels; }) -join ';'
         }
         }
+        }
         It 'Invoke Where' {
                 [C1]::new().Foo() | Should -Be "1;2;3"
         }
@@ -23,6 +25,7 @@ Describe 'Misc Test' -Tags "CI" {
     }
 
     Context 'ForEach' {
+        BeforeAll {
         class C1 {
         [int[]] $Wheels = @(1,2,3);
         [string] Foo() {
@@ -38,6 +41,7 @@ Describe 'Misc Test' -Tags "CI" {
             return $ret
         }
         }
+        }
         It 'Invoke Foreach' {
                 [C1]::new().Foo() | Should -Be "1;2;3;"
         }
@@ -47,10 +51,12 @@ Describe 'Misc Test' -Tags "CI" {
     }
 
     Context 'Class instantiation' {
+        BeforeAll {
         Class C1 {
             [string] Foo() {
                 return (Get-TestText)
             }
+        }
         }
 
         BeforeAll {

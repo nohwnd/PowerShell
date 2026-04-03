@@ -186,6 +186,7 @@ test-function -ProgressAction Ignore
     }
 
     Context "SupportShouldprocess" {
+        BeforeAll {
         $script = '
                 function get-foo
                 {
@@ -197,6 +198,7 @@ test-function -ProgressAction Ignore
                         write-output "foo action"
                     }
                 }'
+        }
 
         It 'SupportShouldprocess' {
 

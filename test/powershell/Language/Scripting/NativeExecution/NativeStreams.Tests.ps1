@@ -9,6 +9,7 @@ Describe "Native streams behavior with PowerShell" -Tags 'CI' {
         # we are using powershell itself as an example of a native program.
         # we can create a behavior we want on the fly and test complex scenarios.
 
+        BeforeAll {
         $error.Clear()
 
         $command = [string]::Join('', @(
@@ -18,6 +19,7 @@ Describe "Native streams behavior with PowerShell" -Tags 'CI' {
         ))
 
         $out = & $powershell -noprofile -command $command 2>&1
+        }
 
         # this check should be the first one, because $error is a global shared variable
         It 'should not add records to $error variable' {

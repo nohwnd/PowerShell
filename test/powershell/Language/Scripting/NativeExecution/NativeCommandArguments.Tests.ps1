@@ -18,7 +18,7 @@ Describe "Behavior is specific for each platform" -tags "CI" {
         $result.Count | Should -Be 3
         $result[0] | Should -Be 1
         $result[1] | Should -Be 1
-        $result[2] | Should Be "a"
+        $result[2] | Should -Be "a"
     }
 
 }

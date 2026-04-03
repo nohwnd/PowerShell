@@ -10,6 +10,7 @@ Describe "Tests for hashtable to PSCustomObject conversion" -Tags "CI" {
         }
     }
 
+   BeforeAll {
    $testdata = @(
         @{ Name = 'New-Object cmdlet should accept empty hashtable or $null as Property argument';
            Cmd = "new-object psobject -property `$null";
@@ -32,6 +33,7 @@ Describe "Tests for hashtable to PSCustomObject conversion" -Tags "CI" {
            ExpectedType = 'System.Management.automation.psobject'
         }
     )
+   }
 
     It 'Type Validation: <Name>' -TestCases:$testdata {
         param ($Name, $Cmd, $ExpectedType)
@@ -74,6 +76,7 @@ Describe "Tests for hashtable to PSCustomObject conversion" -Tags "CI" {
                                 }
     }
 
+    BeforeAll {
     $testdata1 = @(
             @{ Name = 'Creating an object of an existing type from hashtable should throw error when setting non-existent properties';
                Cmd = "[System.MAnagement.Automation.Host.Coordinates]`@{blah=10;Y=5 }";
@@ -96,6 +99,7 @@ Describe "Tests for hashtable to PSCustomObject conversion" -Tags "CI" {
                ErrorID ='InvalidOperationException,Microsoft.PowerShell.Commands.NewObjectCommand'
             }
         )
+    }
 
     It '<Name>' -TestCases:$testData1 {
         param ($Name, $Cmd, $ErrorID, $InnerException)

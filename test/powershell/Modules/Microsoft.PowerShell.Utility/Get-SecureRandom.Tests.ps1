@@ -1,6 +1,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 Describe "Get-SecureRandom DRT Unit Tests" -Tags "CI" {
+    BeforeDiscovery {
     $testData = @(
         @{ Name = 'no params'; Maximum = $null; Minimum = $null; GreaterThan = -1; LessThan = ([int32]::MaxValue); Type = 'System.Int32' }
         @{ Name = 'only positive maximum number'; Maximum = 100; Minimum = $null; GreaterThan = -1; LessThan = 100; Type = 'System.Int32' }
@@ -57,6 +58,7 @@ Describe "Get-SecureRandom DRT Unit Tests" -Tags "CI" {
         @{ Name = 'Min and Max are same and all are negative double-precision number'; Maximum = -20.0; Minimum = -20.0}
         @{ Name = 'Max is a negative number, min is the default number '; Maximum = -10; Minimum = $null}
     )
+    }
 
     # minimum is always set to the actual low end of the range, details refer to closed issue #887.
     It "Should return a correct random number for '<Name>'" -TestCases $testData {

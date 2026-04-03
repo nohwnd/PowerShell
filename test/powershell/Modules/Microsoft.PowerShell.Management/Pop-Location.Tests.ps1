@@ -1,7 +1,9 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 Describe "Pop-Location" -Tags "CI" {
+    BeforeAll {
     $startDirectory = $(Get-Location).Path
+    }
 
     BeforeEach { Set-Location $startDirectory }
 
@@ -26,5 +28,7 @@ Describe "Pop-Location" -Tags "CI" {
 
     }
 
+    BeforeAll {
     Set-Location $startDirectory
+    }
 }

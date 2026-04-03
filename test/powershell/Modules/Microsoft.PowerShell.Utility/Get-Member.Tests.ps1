@@ -58,6 +58,7 @@ Describe "Get-Member" -Tags "CI" {
 
 Describe "Get-Member DRT Unit Tests" -Tags "CI" {
     Context "Verify Get-Member with Class" {
+        BeforeAll {
         if (-not ([System.Management.Automation.PSTypeName]'Employee').Type) {
             Add-Type -TypeDefinition @"
         public class Employee
@@ -160,6 +161,7 @@ Describe "Get-Member DRT Unit Tests" -Tags "CI" {
 
         $XMLFile > $fileToDeleteName
         Update-TypeData -AppendPath $fileToDeleteName
+        }
 
         It "Fail to get member without any input" {
             { Get-Member -MemberType All -ErrorAction Stop } | Should -Throw -ErrorId 'NoObjectInGetMember,Microsoft.PowerShell.Commands.GetMemberCommand'

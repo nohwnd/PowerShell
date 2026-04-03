@@ -566,6 +566,7 @@ ZoneId=$FileType
                 }
             }
 
+            BeforeAll {
             $testScripts = @(
                 $InternetSignatureCorruptedScript
                 $InternetSignedScript
@@ -590,6 +591,7 @@ ZoneId=$FileType
             foreach($testScript in $testScripts)
             {
                 Test-RestrictedExecutionPolicy $testScript
+            }
             }
         }
 
@@ -631,6 +633,7 @@ ZoneId=$FileType
                 }
             }
 
+            BeforeDiscovery {
             $expected = "Hello"
             $testScripts = @(
                 $IntranetSignatureCorruptedScript
@@ -675,6 +678,7 @@ ZoneId=$FileType
             }
 
             $TestTypePrefix = "Test 'Unrestricted' execution policy."
+            }
             It "$TestTypePrefix Importing <module> Module should throw '<error>'" -TestCases $testData  {
                 param([string]$module, [string]$expectedError, [bool]$shouldMarkAsPending)
 
@@ -727,6 +731,7 @@ ZoneId=$FileType
                 }
             }
 
+            BeforeAll {
             $expected = "Hello"
             $testScripts = @(
                 $InternetSignatureCorruptedScript
@@ -750,6 +755,7 @@ ZoneId=$FileType
             )
             foreach($testScript in $testScripts) {
                 Test-ByPassExecutionPolicy $testScript $expected
+            }
             }
         }
 
@@ -806,6 +812,7 @@ ZoneId=$FileType
                     $actualError | Should -Be $errorId
                 }
             }
+            BeforeDiscovery {
             $message = "Hello"
             $errorId = "System.Management.Automation.PSSecurityException"
             $testData = @(
@@ -894,6 +901,7 @@ ZoneId=$FileType
             foreach($testCase in $testData) {
                 Test-RemoteSignedExecutionPolicy @testCase
             }
+            }
         }
 
         Context "Validate that 'AllSigned' execution policy works on OneCore powershell" {
@@ -910,6 +918,7 @@ ZoneId=$FileType
                 }
             }
 
+            BeforeDiscovery {
             $TestTypePrefix = "Test 'AllSigned' execution policy."
 
             $errorId = "UnauthorizedAccess,Microsoft.PowerShell.Commands.ImportModuleCommand"
@@ -932,6 +941,7 @@ ZoneId=$FileType
                     }
                 )
             }
+            }
 
             It "$TestTypePrefix Importing <module> Module should throw '<error>'" -TestCases $testData  {
                 param ([string]$module, [string]$errorId)
@@ -946,6 +956,7 @@ ZoneId=$FileType
                 }
             }
 
+            BeforeDiscovery {
             $errorId = "UnauthorizedAccess"
             $pendingTestData = @(
                 # The following files are not signed correctly when generated, so we will skip for now
@@ -975,8 +986,10 @@ ZoneId=$FileType
                     errorId = $null
                 }
             )
+            }
             It "$TestTypePrefix Running <testScript> Script should throw '<error>'" -TestCases $pendingTestData -Pending  {}
 
+            BeforeDiscovery {
             $testData = @(
                 @{
                     testScript = $InternetSignatureCorruptedScript
@@ -1032,6 +1045,7 @@ ZoneId=$FileType
                 }
 
             )
+            }
             It "$TestTypePrefix Running <testScript> Script should throw '<error>'" -TestCases $testData  {
                 param ([string]$testScript, [string]$errorId)
                 $testScript | Should -Exist
@@ -1047,6 +1061,7 @@ ZoneId=$FileType
         }
     }
 
+    BeforeAll {
     function VerfiyBlockedSetExecutionPolicy
     {
         param(
@@ -1102,6 +1117,7 @@ ZoneId=$FileType
                 }
             }
         }
+    }
     }
 
     Describe "Validate Set-ExecutionPolicy -Scope" -Tags "CI" {

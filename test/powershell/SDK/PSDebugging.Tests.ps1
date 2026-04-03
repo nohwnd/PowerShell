@@ -9,6 +9,7 @@ Describe "PowerShell Command Debugging" -tags "CI" {
         $powershell = Join-Path -Path $PSHOME -ChildPath "pwsh"
     }
 
+    BeforeAll {
     function NewProcessStartInfo([string]$CommandLine, [switch]$RedirectStdIn)
     {
         return [ProcessStartInfo]@{
@@ -36,6 +37,7 @@ Describe "PowerShell Command Debugging" -tags "CI" {
             $process.HasExited | Should -BeTrue
             $process.Kill()
         }
+    }
     }
 
     It "Should be able to step into debugging" {
@@ -248,4 +250,3 @@ Describe "Runspace Debugging API tests" -Tag CI {
 
     }
 }
-

@@ -1,7 +1,9 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 Describe "Get-Location" -Tags "CI" {
+    BeforeAll {
     $currentDirectory=[System.IO.Directory]::GetCurrentDirectory()
+    }
     BeforeEach {
 	Push-Location $currentDirectory
     }

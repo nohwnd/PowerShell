@@ -170,7 +170,9 @@ Describe "Line breakpoints on commands in multi-line pipelines" -Tags "CI" {
     #     </Summary>
     #  </Test>
 
+    BeforeAll {
     $script = Join-Path ${TestDrive} ExposeBug588887.DRT.tmp.ps1
+    }
 
     try
     {
@@ -249,9 +251,11 @@ Describe "Unit tests for various script breakpoints" -Tags "CI" {
     #  </Test>
     param($path = $null)
 
+    BeforeAll {
     if ($null -eq $path)
     {
         $path = Split-Path $MyInvocation.InvocationName
+    }
     }
 
     #
@@ -260,16 +264,10 @@ Describe "Unit tests for various script breakpoints" -Tags "CI" {
     function Verify([ScriptBlock] $command, [System.Management.Automation.Breakpoint[]] $expected)
     {
         $actual = @(& $command)
-
-	    It "Script breakpoint count '${command}'|${expected}" {
-		    $actual.Count | Should -Be $expected.Count
-	    }
-
+        $actual.Count | Should -Be $expected.Count
         foreach ($breakpoint in $actual)
         {
-	        It "Expected script breakpoints '${command}|${breakpoint}'" {
-		        ($expected -contains $breakpoint) | Should -BeTrue
-	        }
+            ($expected -contains $breakpoint) | Should -BeTrue
         }
     }
 
@@ -282,11 +280,7 @@ Describe "Unit tests for various script breakpoints" -Tags "CI" {
         $e.Exception.GetType().Name | Should -Be $exception
     }
 
-    #
-    # Tests
-    #
-    try
-    {
+    BeforeAll {
         #
         # Ensure there are no breakpoints at start of test
         #
@@ -314,71 +308,9 @@ Describe "Unit tests for various script breakpoints" -Tags "CI" {
         $var1 = Set-PSBreakpoint -v variable1 -s $scriptFile1
         $var2 = Set-PSBreakpoint -v variable2 -s $scriptFile2
         $var3 = Set-PSBreakpoint -v variable3
-
-        #
-        # The default parameter set must return all breakpoints
-        #
-        Verify { Get-PSBreakpoint } $line1,$line2,$cmd1,$cmd2,$cmd3,$var1,$var2,$var3
-
-        #
-        # Query by ID
-        #
-        Verify { Get-PSBreakpoint -Id $line1.ID,$cmd1.ID,$var1.ID } $line1,$cmd1,$var1 # -id
-        Verify { Get-PSBreakpoint $line2.ID,$cmd2.ID,$var2.ID }     $line2,$cmd2,$var2 # positional
-        Verify { $cmd3.ID,$var3.ID | Get-PSBreakpoint }             $cmd3,$var3        # value from pipeline
-
-        VerifyException { Get-PSBreakpoint -Id $null } "ParameterBindingValidationException"
-        VerifyException { Get-PSBreakpoint -Id $line1.ID -Script $scriptFile1 } "ParameterBindingException"
-
-        #
-        # Query by Script
-        #
-        Verify { Get-PSBreakpoint -Script $scriptFile1 } $line1,$cmd1,$var1 # -script
-        Verify { Get-PSBreakpoint $scriptFile2 }         $line2,$cmd2,$var2 # positional
-        Verify { $scriptFile2 | Get-PSBreakpoint }       $line2,$cmd2,$var2 # value from pipeline
-
-        VerifyException { Get-PSBreakpoint -Script $null } "ParameterBindingValidationException"
-        VerifyException { Get-PSBreakpoint -Script $scriptFile1,$null } "ParameterBindingValidationException"
-
-        # Verify that relative paths are handled correctly
-        $directoryName = [System.IO.Path]::GetDirectoryName($scriptFile1)
-        $fileName = [System.IO.Path]::GetFileName($scriptFile1)
-
-        Push-Location $directoryName
-        Verify { Get-PSBreakpoint -Script $fileName } $line1,$cmd1,$var1
-        Pop-Location
-
-        #
-        # Query by Type
-        #
-        $commandType = [Microsoft.PowerShell.Commands.BreakpointType]"command"
-        $variableType = [Microsoft.PowerShell.Commands.BreakpointType]"variable"
-
-        Verify { Get-PSBreakpoint -Type "line" }                      $line1,$line2     # -type
-        Verify { Get-PSBreakpoint $commandType }                      $cmd1,$cmd2,$cmd3 # positional
-        Verify { $variableType | Get-PSBreakpoint }                   $var1,$var2,$var3 # value from pipeline
-        Verify { Get-PSBreakpoint -Type "line" -Script $scriptFile1 } @($line1)         # -script parameter
-
-        VerifyException { Get-PSBreakpoint -Type $null } "ParameterBindingValidationException"
-
-        #
-        # Query by Command
-        #
-        Verify { Get-PSBreakpoint -Command "command1","command2" }                       $cmd1,$cmd2 # -command
-        Verify { Get-PSBreakpoint -Command "command1","command2" -Script $scriptFile1 }  @($cmd1)    # -script parameter
-
-        VerifyException { Get-PSBreakpoint -Command $null } "ParameterBindingValidationException"
-
-        #
-        # Query by Variable
-        #
-        Verify { Get-PSBreakpoint -Variable "variable1","variable2" }                       $var1,$var2 # -command
-        Verify { Get-PSBreakpoint -Variable "variable1","variable2" -Script $scriptFile1 }  @($var1)    # -script parameter
-
-        VerifyException { Get-PSBreakpoint -Variable $null } "ParameterBindingValidationException"
     }
-    finally
-    {
+
+    AfterAll {
         if ($null -ne $line1) { $line1 | Remove-PSBreakpoint }
         if ($null -ne $line2) { $line2 | Remove-PSBreakpoint }
         if ($null -ne $cmd1) { $cmd1 | Remove-PSBreakpoint }
@@ -391,6 +323,126 @@ Describe "Unit tests for various script breakpoints" -Tags "CI" {
         if (Test-Path $scriptFile1) { Remove-Item $scriptFile1 -Force }
         if (Test-Path $scriptFile2) { Remove-Item $scriptFile2 -Force }
     }
+
+    #
+    # The default parameter set must return all breakpoints
+    #
+    It "Get-PSBreakpoint returns all breakpoints" {
+        Verify { Get-PSBreakpoint } $line1,$line2,$cmd1,$cmd2,$cmd3,$var1,$var2,$var3
+    }
+
+    #
+    # Query by ID
+    #
+    It "Get-PSBreakpoint -Id returns specified breakpoints" {
+        Verify { Get-PSBreakpoint -Id $line1.ID,$cmd1.ID,$var1.ID } $line1,$cmd1,$var1
+    }
+
+    It "Get-PSBreakpoint with positional Id returns specified breakpoints" {
+        Verify { Get-PSBreakpoint $line2.ID,$cmd2.ID,$var2.ID } $line2,$cmd2,$var2
+    }
+
+    It "Get-PSBreakpoint with pipeline Id returns specified breakpoints" {
+        Verify { $cmd3.ID,$var3.ID | Get-PSBreakpoint } $cmd3,$var3
+    }
+
+    It "Get-PSBreakpoint -Id with null throws ParameterBindingValidationException" {
+        VerifyException { Get-PSBreakpoint -Id $null } "ParameterBindingValidationException"
+    }
+
+    It "Get-PSBreakpoint -Id with -Script throws ParameterBindingException" {
+        VerifyException { Get-PSBreakpoint -Id $line1.ID -Script $scriptFile1 } "ParameterBindingException"
+    }
+
+    #
+    # Query by Script
+    #
+    It "Get-PSBreakpoint -Script returns breakpoints for specified script" {
+        Verify { Get-PSBreakpoint -Script $scriptFile1 } $line1,$cmd1,$var1
+    }
+
+    It "Get-PSBreakpoint with positional script returns breakpoints" {
+        Verify { Get-PSBreakpoint $scriptFile2 } $line2,$cmd2,$var2
+    }
+
+    It "Get-PSBreakpoint with pipeline script returns breakpoints" {
+        Verify { $scriptFile2 | Get-PSBreakpoint } $line2,$cmd2,$var2
+    }
+
+    It "Get-PSBreakpoint -Script with null throws ParameterBindingValidationException" {
+        VerifyException { Get-PSBreakpoint -Script $null } "ParameterBindingValidationException"
+    }
+
+    It "Get-PSBreakpoint -Script with null in array throws ParameterBindingValidationException" {
+        VerifyException { Get-PSBreakpoint -Script $scriptFile1,$null } "ParameterBindingValidationException"
+    }
+
+    # Verify that relative paths are handled correctly
+    It "Get-PSBreakpoint -Script with relative path returns correct breakpoints" {
+        $directoryName = [System.IO.Path]::GetDirectoryName($scriptFile1)
+        $fileName = [System.IO.Path]::GetFileName($scriptFile1)
+        Push-Location $directoryName
+        try {
+            Verify { Get-PSBreakpoint -Script $fileName } $line1,$cmd1,$var1
+        } finally {
+            Pop-Location
+        }
+    }
+
+    #
+    # Query by Type
+    #
+    It "Get-PSBreakpoint -Type line returns line breakpoints" {
+        Verify { Get-PSBreakpoint -Type "line" } $line1,$line2
+    }
+
+    It "Get-PSBreakpoint with positional command type returns command breakpoints" {
+        $commandType = [Microsoft.PowerShell.Commands.BreakpointType]"command"
+        Verify { Get-PSBreakpoint $commandType } $cmd1,$cmd2,$cmd3
+    }
+
+    It "Get-PSBreakpoint with pipeline variable type returns variable breakpoints" {
+        $variableType = [Microsoft.PowerShell.Commands.BreakpointType]"variable"
+        Verify { $variableType | Get-PSBreakpoint } $var1,$var2,$var3
+    }
+
+    It "Get-PSBreakpoint -Type line -Script returns filtered breakpoints" {
+        Verify { Get-PSBreakpoint -Type "line" -Script $scriptFile1 } @($line1)
+    }
+
+    It "Get-PSBreakpoint -Type with null throws ParameterBindingValidationException" {
+        VerifyException { Get-PSBreakpoint -Type $null } "ParameterBindingValidationException"
+    }
+
+    #
+    # Query by Command
+    #
+    It "Get-PSBreakpoint -Command returns command breakpoints" {
+        Verify { Get-PSBreakpoint -Command "command1","command2" } $cmd1,$cmd2
+    }
+
+    It "Get-PSBreakpoint -Command with -Script returns filtered breakpoints" {
+        Verify { Get-PSBreakpoint -Command "command1","command2" -Script $scriptFile1 } @($cmd1)
+    }
+
+    It "Get-PSBreakpoint -Command with null throws ParameterBindingValidationException" {
+        VerifyException { Get-PSBreakpoint -Command $null } "ParameterBindingValidationException"
+    }
+
+    #
+    # Query by Variable
+    #
+    It "Get-PSBreakpoint -Variable returns variable breakpoints" {
+        Verify { Get-PSBreakpoint -Variable "variable1","variable2" } $var1,$var2
+    }
+
+    It "Get-PSBreakpoint -Variable with -Script returns filtered breakpoints" {
+        Verify { Get-PSBreakpoint -Variable "variable1","variable2" -Script $scriptFile1 } @($var1)
+    }
+
+    It "Get-PSBreakpoint -Variable with null throws ParameterBindingValidationException" {
+        VerifyException { Get-PSBreakpoint -Variable $null } "ParameterBindingValidationException"
+    }
 }
 
 Describe "Unit tests for line breakpoints on dot-sourced files" -Tags "CI" {
@@ -402,9 +454,11 @@ Describe "Unit tests for line breakpoints on dot-sourced files" -Tags "CI" {
     #
     param($path = $null)
 
+    BeforeAll {
     if ($null -eq $path)
     {
         $path = Split-Path $MyInvocation.InvocationName
+    }
     }
 
     try
@@ -487,7 +541,9 @@ Describe "Unit tests for line breakpoints on modules" -Tags "CI" {
     #    <Summary>Unit tests for line breakpoints on modules...</Summary>
     #  </Test>
     #
+    BeforeAll {
     $oldModulePath = $env:PSModulePath
+    }
     try
     {
         #
@@ -597,9 +653,11 @@ Describe "Sometimes line breakpoints are ignored" -Tags "CI" {
     #
     #####################################################################################
 
+    BeforeAll {
     $path = [io.path]::GetTempPath();
     $tempFileName1 = Join-Path -Path $path -ChildPath "TDBG47488F.ps1"
     $tempFileName2 = Join-Path -Path $path -ChildPath "TDBG88473F.ps1"
+    }
 
     try
     {

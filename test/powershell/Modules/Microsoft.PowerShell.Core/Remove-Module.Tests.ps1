@@ -393,7 +393,9 @@ Describe "Remove-Module : module contains nested modules" -Tags "CI" {
 }
 
 Describe "Remove-Module core module on module path by name" -Tags "CI" {
+    BeforeAll {
     $moduleName = "Microsoft.PowerShell.Security"
+    }
 
     BeforeEach {
         Import-Module -Name $moduleName -Force

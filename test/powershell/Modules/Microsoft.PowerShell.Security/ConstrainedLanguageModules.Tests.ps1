@@ -803,6 +803,7 @@ try
 
     Describe "Import trusted module files in system lockdown mode" -Tags 'Feature','RequireAdminOnWindows' {
 
+        BeforeAll {
         function CreateModuleNames
         {
             param (
@@ -811,6 +812,7 @@ try
 
             $script:scriptModuleName = $moduleName
             $script:moduleFileName = Join-Path $TestDrive ($moduleName + ".psm1")
+        }
         }
 
         It "Verifes that trusted module file exports no functions in system lockdown" {
@@ -909,6 +911,7 @@ try
 
     Describe "Import trusted manifest files in system lockdown mode" -Tags 'Feature','RequireAdminOnWindows' {
 
+        BeforeAll {
         function CreateManifestNames
         {
             param (
@@ -933,6 +936,7 @@ try
             {
                 $script:dotmoduleFileName = Join-Path $TestDrive ($moduleName + "Dot" + ".ps1")
             }
+        }
         }
 
         It "Verifies that trusted manifest exports no functions by default in lock down mode" {
@@ -1313,6 +1317,7 @@ try
 
     Describe "Untrusted manifest and module files import in lock down mode" -Tags 'Feature','RequireAdminOnWindows' {
 
+        BeforeAll {
         function CreateManifestNames
         {
             param (
@@ -1322,6 +1327,7 @@ try
             $script:scriptModuleName = $moduleName
             $script:moduleFileName = Join-Path $TestDrive ($moduleName + ".psm1")
             $script:manifestFileName = Join-Path $TestDrive ($moduleName + ".psd1")
+        }
         }
 
         It "Verifies that importing untrusted manifest in lock down mode exports all functions by default" {

@@ -8,6 +8,7 @@ Describe 'Test for cmdlet to support Ordered Attribute on hash literal nodes' -T
     }
 
     Context 'Select-Xml cmdlet - Namespace parameter must take IDictionary' {
+        BeforeAll {
         $script:a = $null
 
         $helpXml = @'
@@ -30,6 +31,7 @@ Describe 'Test for cmdlet to support Ordered Attribute on hash literal nodes' -T
                         [ordered]@{command="http://schemas.microsoft.com/maml/dev/command/2004/10";
                                    maml="http://schemas.microsoft.com/maml/2004/10";
                                    dev="http://schemas.microsoft.com/maml/dev/2004/10"})  } | Should -Not -Throw
+        }
 
         It '$a should not be $null' { $script:a | Should -Not -BeNullOrEmpty }
    }
@@ -62,11 +64,13 @@ Describe 'Test for cmdlet to support Ordered Attribute on hash literal nodes' -T
 
     Context 'Select-Object cmdlet - Property parameter (Calculated properties) must take IDictionary' {
 
+        BeforeAll {
         $script:a = $null
 
         {$script:a = Get-ChildItem | Select-Object -Property Name, (
                     [ordered]@{Name="IsDirectory";
                                Expression ={$_.PSIsContainer}})} | Should -Not -Throw
+        }
 
         It '$a should not be $null'  { $script:a | Should -Not -BeNullOrEmpty }
     }

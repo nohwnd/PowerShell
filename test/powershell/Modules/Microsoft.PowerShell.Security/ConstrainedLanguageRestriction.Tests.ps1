@@ -616,6 +616,7 @@ try
 
     Describe "Data section additional commands in constrained language" -Tags 'Feature','RequireAdminOnWindows' {
 
+        BeforeAll {
         function InvokeDataSectionConstrained
         {
             try
@@ -627,6 +628,7 @@ try
             {
                 return $_
             }
+        }
         }
 
         It "Verifies data section Add-Type additional command is disallowed in constrained language" {

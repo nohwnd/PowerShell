@@ -6,6 +6,7 @@ Describe "SSHRemoting Basic Tests" -tags CI {
     # SSH remoting is set up to automatically authenticate current user via SSH keys
     # All tests connect back to localhost machine
 
+    BeforeAll {
     $script:TestConnectingTimeout = 5000    # Milliseconds
 
     function RestartSSHDService
@@ -134,6 +135,7 @@ Describe "SSHRemoting Basic Tests" -tags CI {
         $psRemoteVersion.Minor | Should -BeExactly $PSVersionTable.PSVersion.Minor
         Write-Verbose -Verbose "VerifySession complete"
     }
+    }
 
     Context "New-PSSession Tests" {
 
@@ -251,6 +253,7 @@ Describe "SSHRemoting Basic Tests" -tags CI {
         #>
     }
 
+    BeforeAll {
     function TryCreateRunspace
     {
         param (
@@ -333,6 +336,7 @@ Describe "SSHRemoting Basic Tests" -tags CI {
             $ps.Dispose()
         }
     }
+    }
 
     Context "SSH Remoting API Tests" {
 
@@ -342,6 +346,7 @@ Describe "SSHRemoting Basic Tests" -tags CI {
             Write-Verbose -Verbose "AfterEach complete"
         }
 
+        BeforeDiscovery {
         $testCases = @(
             @{
                 testName = 'Verifies connection with implicit user'
@@ -384,6 +389,7 @@ Describe "SSHRemoting Basic Tests" -tags CI {
                 Subsystem = 'powershell'
             }
         )
+        }
 
         It "<testName>" -TestCases $testCases {
             param (

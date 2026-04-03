@@ -157,62 +157,54 @@ try
 
             Context "Validate Enable-PSSessionConfiguration and Disable-PSSessionConfiguration" {
 
-                function VerifyEnableAndDisablePSSessionConfig {
+                BeforeDiscovery {
+                    $TestData = @(
+                        @{
+                            SessionConfigName = "TestDisablePSSessionConfig"
+                            InitialSessionStateEnabled = $true
+                            FinalSessionStateEnabled = $false
+                            TestDescription = "Validate Disable-Configuration cmdlet"
+                            EnablePSSessionConfig = $false
+                        }
+
+                        @{
+                            SessionConfigName = "TestEnablePSSessionConfig"
+                            InitialSessionStateEnabled = $false
+                            FinalSessionStateEnabled = $true
+                            TestDescription = "Validate Enable-Configuration cmdlet"
+                            EnablePSSessionConfig = $true
+                        }
+                    )
+                }
+
+                It "<TestDescription>" -TestCases $TestData {
                     param (
                         [string] $SessionConfigName,
-                        [string] $ConfigFilePath,
                         [Bool] $InitialSessionStateEnabled,
                         [Bool] $FinalSessionStateEnabled,
                         [string] $TestDescription,
                         [bool] $EnablePSSessionConfig)
 
-                    It "$TestDescription" {
+                    RegisterNewConfiguration -Name $SessionConfigName -ConfigFilePath $LocalConfigFilePath -Enabled:$InitialSessionStateEnabled
 
-                        RegisterNewConfiguration -Name $SessionConfigName -ConfigFilePath $ConfigFilePath -Enabled:$InitialSessionStateEnabled
+                    $TestConfigStateBeforeChange = (Get-PSSessionConfiguration -Name $SessionConfigName).Enabled
 
-                        $TestConfigStateBeforeChange = (Get-PSSessionConfiguration -Name $SessionConfigName).Enabled
-
-                        if($EnablePSSessionConfig) {
-                            $isSkipNetworkCheck = $true
-                            # TODO: Get-NetConnectionProfile is not available during typical PS Core deployments. Once it is, this check should be used.
-                            #Get-NetConnectionProfile | Where-Object { $_.NetworkCategory -eq "Public" } | ForEach-Object { $isSkipNetworkCheck = $true }
-                            Enable-PSSessionConfiguration -Name $SessionConfigName -NoServiceRestart -SkipNetworkProfileCheck:$isSkipNetworkCheck
-                        }
-                        else {
-                            Disable-PSSessionConfiguration -Name $SessionConfigName -NoServiceRestart
-                        }
-
-                        $TestConfigStateAfterChange = (Get-PSSessionConfiguration -Name $SessionConfigName -ErrorAction SilentlyContinue).Enabled
-
-                        UnregisterPSSessionConfiguration -Name $SessionConfigName
-
-                        $TestConfigStateBeforeChange | Should -Be "$InitialSessionStateEnabled"
-                        $TestConfigStateAfterChange | Should -Be "$FinalSessionStateEnabled"
+                    if($EnablePSSessionConfig) {
+                        $isSkipNetworkCheck = $true
+                        # TODO: Get-NetConnectionProfile is not available during typical PS Core deployments. Once it is, this check should be used.
+                        #Get-NetConnectionProfile | Where-Object { $_.NetworkCategory -eq "Public" } | ForEach-Object { $isSkipNetworkCheck = $true }
+                        Enable-PSSessionConfiguration -Name $SessionConfigName -NoServiceRestart -SkipNetworkProfileCheck:$isSkipNetworkCheck
                     }
-                }
-
-                $TestData = @(
-                    @{
-                        SessionConfigName = "TestDisablePSSessionConfig"
-                        ConfigFilePath = $LocalConfigFilePath
-                        InitialSessionStateEnabled = $true
-                        FinalSessionStateEnabled = $false
-                        TestDescription = "Validate Disable-Configuration cmdlet"
-                        EnablePSSessionConfig = $false
+                    else {
+                        Disable-PSSessionConfiguration -Name $SessionConfigName -NoServiceRestart
                     }
 
-                    @{
-                        SessionConfigName = "TestEnablePSSessionConfig"
-                        ConfigFilePath = $LocalConfigFilePath
-                        InitialSessionStateEnabled = $false
-                        FinalSessionStateEnabled = $true
-                        TestDescription = "Validate Enable-Configuration cmdlet"
-                        EnablePSSessionConfig = $true
-                    }
-                )
+                    $TestConfigStateAfterChange = (Get-PSSessionConfiguration -Name $SessionConfigName -ErrorAction SilentlyContinue).Enabled
 
-                foreach ($testcase in $testData) {
-                    VerifyEnableAndDisablePSSessionConfig @testcase
+                    UnregisterPSSessionConfiguration -Name $SessionConfigName
+
+                    $TestConfigStateBeforeChange | Should -Be "$InitialSessionStateEnabled"
+                    $TestConfigStateAfterChange | Should -Be "$FinalSessionStateEnabled"
                 }
             }
 
@@ -230,66 +222,59 @@ try
                     }
                 }
 
-                function TestUnRegisterPSSsessionConfiguration {
-
-                    param ($Description, $SessionConfigName, $ExpectedOutput, $ExpectedError)
-
-                    It "$Description" {
-
-                        $Result = [PSObject] @{Output = $true ; Error = $null}
-                        $error.Clear()
-                        try {
-                            $null = Unregister-PSSessionConfiguration -name $SessionConfigName -ErrorAction stop
+                BeforeDiscovery {
+                    $TestData = @(
+                        @{
+                            Description = "Validate Unregister-PSSessionConfiguration with -name parameter"
+                            SessionConfigName = "TestUnregisterPSSessionConfig"
+                            ExpectedOutput = $true
+                            ExpectedError = $null
                         }
-                        catch {
-                            $Result.Error = $_.Exception
+                        @{
+                            Description = "Validate Unregister-PSSessionConfiguration with name having wildcard character"
+                            SessionConfigName = "TestUnregister*"
+                            ExpectedOutput = $true
+                            ExpectedError = $null
                         }
-
-                        if(-not $Result.Error) {
-                            $ValidEndpoints = [PSObject]@(Get-PSSessionConfiguration)
-
-                            foreach ($endpoint in $ValidEndpoints) {
-                                # Setting it to false means the unregister was unsuccessful
-                                # and there is still an endpoint with name matching the one we wanted to remove.
-                                if($endpoint.name -like $SessionConfigName) {
-                                    $Result.Output = $false
-                                    break
-                                }
-                            }
+                        @{
+                            Description = "Validate Unregister-PSSessionConfiguration for non-existant endpoint"
+                            SessionConfigName = 'TestInvalidEndPoint'
+                            ExpectedOutput = $false
+                            ExpectedError = "No session configuration matches criteria `"TestInvalidEndPoint`"."
                         }
-                        else {
-                            $Result.Output = $false
-                        }
-
-                        $Result.Output | Should -Match $ExpectedOutput
-                        $Result.Error | Should -Match $ExpectedError
-                    }
+                    )
                 }
 
-                $TestData = @(
-                    @{
-                        Description = "Validate Unregister-PSSessionConfiguration with -name parameter"
-                        SessionConfigName = "TestUnregisterPSSessionConfig"
-                        ExpectedOutput = $true
-                        ExpectedError = $null
-                    }
-                    @{
-                        Description = "Validate Unregister-PSSessionConfiguration with name having wildcard character"
-                        SessionConfigName = "TestUnregister*"
-                        ExpectedOutput = $true
-                        ExpectedError = $null
-                    }
-                    @{
-                        Description = "Validate Unregister-PSSessionConfiguration for non-existant endpoint"
-                        SessionConfigName = 'TestInvalidEndPoint'
-                        ExpectedOutput = $false
-                        ExpectedError = "No session configuration matches criteria `"TestInvalidEndPoint`"."
-                    }
-                )
+                It "<Description>" -TestCases $TestData {
+                    param ($Description, $SessionConfigName, $ExpectedOutput, $ExpectedError)
 
-                foreach ($TestCase in $TestData)
-                {
-                    TestUnRegisterPSSsessionConfiguration @TestCase
+                    $Result = [PSObject] @{Output = $true ; Error = $null}
+                    $error.Clear()
+                    try {
+                        $null = Unregister-PSSessionConfiguration -name $SessionConfigName -ErrorAction stop
+                    }
+                    catch {
+                        $Result.Error = $_.Exception
+                    }
+
+                    if(-not $Result.Error) {
+                        $ValidEndpoints = [PSObject]@(Get-PSSessionConfiguration)
+
+                        foreach ($endpoint in $ValidEndpoints) {
+                            # Setting it to false means the unregister was unsuccessful
+                            # and there is still an endpoint with name matching the one we wanted to remove.
+                            if($endpoint.name -like $SessionConfigName) {
+                                $Result.Output = $false
+                                break
+                            }
+                        }
+                    }
+                    else {
+                        $Result.Output = $false
+                    }
+
+                    $Result.Output | Should -Match $ExpectedOutput
+                    $Result.Error | Should -Match $ExpectedError
                 }
             }
         }
@@ -846,4 +831,3 @@ finally
     Pop-DefaultParameterValueStack
     $WarningPreference = $originalWarningPreference
 }
-

@@ -229,7 +229,9 @@ Describe 'Sort-Object Stable Unit Tests' -Tags 'CI' {
 
 	Context 'Modulo stable sort' {
 
+		BeforeAll {
 		$unsortedData = 1..20
+		}
 
 		It 'Return each value in an ordered set, sorted by the value modulo 3, with items having the same result appearing in the same order' {
 			$results = $unsortedData | Sort-Object {$_ % 3} -Stable
@@ -314,6 +316,7 @@ Describe 'Sort-Object Stable Unit Tests' -Tags 'CI' {
 Describe 'Sort-Object Top and Bottom Unit Tests' -Tags 'CI' {
 
 	# Helper function to compare two sort entries
+	BeforeDiscovery {
 	function Compare-SortEntry
 	{
 		param($nSortEntry, $fullSortEntry)
@@ -364,10 +367,13 @@ Describe 'Sort-Object Top and Bottom Unit Tests' -Tags 'CI' {
 		@{nSortType='Bottom'; orderType='ascending' }
 		@{nSortType='Bottom'; orderType='descending'}
 	)
+	}
 
 	Context 'Integer n-sort' {
 
+		BeforeAll {
 		$unsortedData = 973474993,271612178,-1258909473,659770354,1829227828,-1709391247,-10835210,-1477737798,1125017828,813732193
+		}
 
 		It 'Return the <nSortType> N sorted in <orderType> order' -TestCases $topBottomAscendingDescending {
 			param([string]$nSortType, [string]$orderType)
@@ -385,6 +391,7 @@ Describe 'Sort-Object Top and Bottom Unit Tests' -Tags 'CI' {
 
 	Context 'Heterogeneous n-sort' {
 
+		BeforeAll {
 		$unsortedData = @(
 			'x'
 			Get-Alias where
@@ -398,6 +405,7 @@ Describe 'Sort-Object Top and Bottom Unit Tests' -Tags 'CI' {
 			'z'
 			,@($null) # Use this syntax to pass an array with a single $null value to sort-object (also useful when testing sorts with unexpected data)
 		)
+		}
 
 		It 'Return the <nSortType> N sorted in <orderType> order' -TestCases $topBottomAscendingDescending {
 			param([string]$nSortType, [string]$orderType)
@@ -416,6 +424,7 @@ Describe 'Sort-Object Top and Bottom Unit Tests' -Tags 'CI' {
 
 	Context 'Homogeneous n-sort' {
 
+		BeforeAll {
 		$unsortedData = @(
 			[pscustomobject]@{PSTypeName='Employee';FirstName='Dwayne';LastName='Smith' ;YearsInMS=8    }
 			[pscustomobject]@{PSTypeName='Employee';FirstName='Lucy'  ;                 ;YearsInMS=$null}
@@ -426,6 +435,7 @@ Describe 'Sort-Object Top and Bottom Unit Tests' -Tags 'CI' {
 			[pscustomobject]@{PSTypeName='Employee';FirstName='Joseph';LastName='Smith' ;YearsInMS=15   }
 			[pscustomobject]@{PSTypeName='Employee';FirstName='John'  ;LastName='Smyth' ;YearsInMS=12   }
 		)
+		}
 
 		It 'Return the <nSortType> N sorted by property in <orderType> order' -TestCases $topBottomAscendingDescending {
 			param([string]$nSortType, [string]$orderType)
@@ -494,12 +504,14 @@ Describe 'Sort-Object Top and Bottom Unit Tests' -Tags 'CI' {
 
 	Context 'N-sort of objects that do not define ToString' {
 
+		BeforeAll {
 		Add-Type -TypeDefinition 'public enum PipelineState{NotStarted,Running,Stopping,Stopped,Completed,Failed,Disconnected}'
 		$unsortedData = @(
 			[pscustomobject]@{PipelineId=1;Cmdline='cmd3';Status=[PipelineState]::Completed;StartTime=[DateTime]::Now;EndTime=[DateTime]::Now.AddSeconds(5.0)}
 			[pscustomobject]@{PipelineId=2;Cmdline='cmd1';Status=[PipelineState]::Completed;StartTime=[DateTime]::Now;EndTime=[DateTime]::Now.AddSeconds(5.0)}
 			[pscustomobject]@{PipelineId=3;Cmdline='cmd2';Status=[PipelineState]::Completed;StartTime=[DateTime]::Now;EndTime=[DateTime]::Now.AddSeconds(5.0)}
 		)
+		}
 
 		It 'Return the <nSortType> N sorted in <orderType> order' -TestCases $topBottomAscendingDescending {
 			param([string]$nSortType, [string]$orderType)
@@ -511,6 +523,7 @@ Describe 'Sort-Object Top and Bottom Unit Tests' -Tags 'CI' {
 
 	Context 'N-sort of objects with some null property values' {
 
+		BeforeAll {
 		$item0 = New-Object -TypeName Microsoft.PowerShell.Commands.NewObjectCommand
 		$item1 = New-Object -TypeName Microsoft.PowerShell.Commands.NewObjectCommand
 		$item1.TypeName = 'DeeType'
@@ -519,6 +532,7 @@ Describe 'Sort-Object Top and Bottom Unit Tests' -Tags 'CI' {
 		$item3 = New-Object -TypeName Microsoft.PowerShell.Commands.NewObjectCommand
 		$item3.TypeName = 'A-Type'
 		$unsortedData = @($item0,$item1,$item2,'b',$item3)
+		}
 
 		It 'Return the <nSortType> N objects by property in <orderType> order' -TestCases $topBottomAscendingDescending {
 			param([string]$nSortType, [string]$orderType)

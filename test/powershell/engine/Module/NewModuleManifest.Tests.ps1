@@ -99,10 +99,12 @@ Describe "New-ModuleManifest tests" -tags "CI" {
         $module.PrivateData.PSData.ProjectUri | Should -BeExactly $absoluteUri
     }
 
+    BeforeAll {
     function TestNewModuleManifestEncoding {
         param ([byte[]]$expected)
         New-ModuleManifest -Path $manifestPath
         (Get-Content -AsByteStream -Path $manifestPath -TotalCount $expected.Length) -join ',' | Should -Be ($expected -join ',')
+    }
     }
 
     It "Verify module manifest encoding" {

@@ -7,9 +7,11 @@ Describe "ConvertTo-Html Tests" -Tags "CI" {
         $newLine = "`r`n"
     }
 
+    BeforeAll {
     function normalizeLineEnds([string]$text)
     {
         $text -replace "`r`n?|`n", "`r`n"
+    }
     }
 
     It "Test ConvertTo-Html with no parameters" {

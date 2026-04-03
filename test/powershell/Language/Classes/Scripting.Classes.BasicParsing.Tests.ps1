@@ -107,14 +107,20 @@ Describe 'Positive Parse Properties Tests' -Tags "CI" {
 
     Context "Positive ParseMethods return type Test" {
         # Method with return type of self
+        BeforeAll {
         class C9 { [C9] f() { return [C9]::new() } }
         $c9 = [C9]::new().f()
+        }
         It "Expected a C9 returned" { $c9.GetType().Name | Should -Be C9 }
+        BeforeAll {
         class C9a { [C9a[]] f() { return [C9a]::new() } }
         $c9a = [C9a]::new().f()
+        }
         It "Expected a C9a[] returned" { $c9a.GetType().Name | Should -Be C9a[] }
+        BeforeAll {
         class C9b { [System.Collections.Generic.List[C9b]] f() { return [C9b]::new() } }
         $c9b = [C9b]::new().f()
+        }
         It "Expected a System.Collections.Generic.List[C9b] returned" {  $c9b -is [System.Collections.Generic.List[C9b]] | Should -BeTrue }
         It 'Methods returning object should return $null if no output was produced' {
             class Foo {
@@ -257,6 +263,7 @@ Describe 'Positive Parse Properties Tests' -Tags "CI" {
 }
 
 Describe 'Negative Parsing Tests' -Tags "CI" {
+    BeforeAll {
     ShouldBeParseError 'class' MissingNameAfterKeyword 5
     ShouldBeParseError 'class foo' MissingTypeBody 9
     ShouldBeParseError 'class foo {' MissingEndCurlyBrace 11
@@ -311,9 +318,11 @@ Describe 'Negative Parsing Tests' -Tags "CI" {
     ShouldBeParseError 'class C : B' MissingTypeBody 11
 
     ShouldBeParseError 'Class foo { q(){} w(){}' MissingEndCurlyBrace 11
+    }
 }
 
 Describe 'Negative methods Tests' -Tags "CI" {
+    BeforeAll {
     ShouldBeParseError 'class foo { f() { param($x) } }' ParamBlockNotAllowedInMethod 18
     ShouldBeParseError 'class foo { f() { dynamicparam {} } }' NamedBlockNotAllowedInMethod 18
     ShouldBeParseError 'class foo { f() { begin {} } }' NamedBlockNotAllowedInMethod 18
@@ -322,15 +331,19 @@ Describe 'Negative methods Tests' -Tags "CI" {
     ShouldBeParseError 'class foo { f([Parameter()]$a) {} }' AttributeNotAllowedOnDeclaration 14
     ShouldBeParseError 'class foo { [int] foo() { return 1 }}' ConstructorCantHaveReturnType 12
     ShouldBeParseError 'class foo { [void] bar($a, [string][int]$b, $c) {} }' MultipleTypeConstraintsOnMethodParam 35
+    }
 }
 
 Describe 'Negative Assignment Tests' -Tags "CI" {
+    BeforeAll {
     ShouldBeParseError 'class foo { [string ]$path; f() { $path="" } }' MissingThis 34
     ShouldBeParseError 'class foo { [string ]$path; f() { [string] $path="" } }' MissingThis 43
     ShouldBeParseError 'class foo { [string ]$path; f() { [int] [string] $path="" } }' MissingThis 49
+    }
 }
 
 Describe 'Negative Assignment Tests' -Tags "CI" {
+    BeforeAll {
     ShouldBeParseError '[DscResource()]class C { [bool] Test() { return $false } [C] Get() { return $this } Set() {} }' DscResourceMissingKeyProperty 0
 
     # Test method
@@ -352,10 +365,12 @@ Describe 'Negative Assignment Tests' -Tags "CI" {
 
     # Default ctor
     ShouldBeParseError '[DscResource()]class C { [DscProperty(Key)][string]$Key; [bool] Test() { return $false } [C] Get() { return $this } Set() {} C($a) { } }' DscResourceMissingDefaultConstructor 0
+    }
 }
 
 Describe 'Negative DscResources Tests' -Tags "CI" {
         # Usage errors
+        BeforeAll {
         ShouldBeParseError '[Flags()]class C{}' AttributeNotAllowedOnDeclaration 0
         ShouldBeParseError 'class C { [Flags()]$field; }' AttributeNotAllowedOnDeclaration 10
         ShouldBeParseError 'class C { [Flags()]foo(){} }' AttributeNotAllowedOnDeclaration 10
@@ -369,24 +384,33 @@ Describe 'Negative DscResources Tests' -Tags "CI" {
         ShouldBeParseError '[System.Management.Automation.Cmdlet("Get", "Thing", NounName="foo")]class C{}' ReadOnlyProperty 53
         ShouldBeParseError '[System.Management.Automation.Cmdlet("Get", "Thing", ConfirmImpact=$zed)]class C{}' ParameterAttributeArgumentNeedsToBeConstant 67
         ShouldBeParseError 'class C{ [ValidateScript({})]$p; }' ParameterAttributeArgumentNeedsToBeConstant 25
+        }
 }
 
 Describe 'Negative ClassAttributes Tests' -Tags "CI" {
+    BeforeAll {
     [System.Management.Automation.Cmdlet("Get", "Thing")]class C{}
     $t = [C].GetCustomAttributes($false)
+    }
 
     It "Should have one attribute (class C)" {$t.Count | Should -Be 1}
     It "Should have instance of CmdletAttribute (class C)" {$t[0] | Should -BeOfType System.Management.Automation.CmdletAttribute }
 
+    BeforeAll {
     [System.Management.Automation.CmdletAttribute]$c = $t[0]
+    }
     It "Verb should be Get (class C)" {$c.VerbName | Should -BeExactly 'Get'}
     It "Noun should be Thing (class C)" {$c.NounName | Should -BeExactly 'Thing'}
 
+    BeforeAll {
     [System.Management.Automation.Cmdlet("Get", "Thing", SupportsShouldProcess = $true, SupportsPaging = $true)]class C2{}
     $t = [C2].GetCustomAttributes($false)
+    }
     It "Should have one attribute (class C2)" { $t.Count | Should -Be 1 }
     It "Should have instance of CmdletAttribute (class C2)" { $t[0] | Should -BeOfType System.Management.Automation.CmdletAttribute }
+    BeforeAll {
     [System.Management.Automation.CmdletAttribute]$c = $t[0]
+    }
     It "Verb should be Get (class C2)" {$c.VerbName | Should -BeExactly 'Get'}
     It "Noun should be Thing (class C2)" {$c.NounName | Should -BeExactly 'Thing'}
 
@@ -406,11 +430,15 @@ Describe 'Negative ClassAttributes Tests' -Tags "CI" {
 }
 
 Describe 'Property Attributes Test' -Tags "CI" {
+        BeforeAll {
         class C { [ValidateSet('a', 'b')]$p; }
 
         $t = [C].GetProperty('p').GetCustomAttributes($false)
+        }
         It "Should have one attribute" { $t.Count | Should -Be 1 }
+        BeforeAll {
         [ValidateSet]$v = $t[0]
+        }
         It "Should have 2 valid values" { $v.ValidValues.Count | Should -Be 2 }
         It "first value should be a" { $v.ValidValues[0] | Should -Be 'a' }
         It "second value should be b" { $v.ValidValues[1] | Should -Be 'b' }
@@ -530,14 +558,17 @@ Describe 'Testing Method Names can be Keywords' -Tags "CI" {
 }
 
 Describe 'Method Attributes Test' -Tags "CI" {
+        BeforeAll {
         class C { [Obsolete("aaa")][int]f() { return 1 } }
 
         $t = [C].GetMethod('f').GetCustomAttributes($false)
+        }
         It "Should have one attribute" {$t.Count | Should -Be 1 }
         It "Attribute type should be ObsoleteAttribute" { $t[0].GetType().FullName | Should -Be System.ObsoleteAttribute }
 }
 
 Describe 'Positive SelfClass Type As Parameter Test' -Tags "CI" {
+        BeforeAll {
         class Point
         {
             Point($x, $y) { $this.x = $x; $this.y = $y }
@@ -549,6 +580,7 @@ Describe 'Positive SelfClass Type As Parameter Test' -Tags "CI" {
 
             Print() { Write-Host "[`$x=$($this.x) `$y=$($this.y)]" }
             Set($x, $y) { $this.x = $x; $this.y = $y }
+        }
         }
         It  "[Point]::Add works construction via ::new" {
             $point = [Point]::new(100,200)
@@ -570,6 +602,7 @@ Describe 'Positive SelfClass Type As Parameter Test' -Tags "CI" {
 }
 
 Describe 'PositiveReturnSelfClassTypeFromMemberFunction Test' -Tags "CI" {
+        BeforeAll {
         class ReturnObjectFromMemberFunctionTest
         {
             [ReturnObjectFromMemberFunctionTest] CreateInstance()
@@ -583,13 +616,23 @@ Describe 'PositiveReturnSelfClassTypeFromMemberFunction Test' -Tags "CI" {
         }
         $f = [ReturnObjectFromMemberFunctionTest]::new()
         $z = $f.CreateInstance() # Line 13
+        }
         It "CreateInstance works" { $z.SayHello() | Should -BeExactly 'Hello1' }
 }
 
 Describe 'TestMultipleArguments Test' -Tags "CI" {
+        BeforeDiscovery {
         if ( $IsCoreCLR ) { $maxCount = 14 } else { $maxCount = 16 }
-        for ($i = 0; $i -lt $maxCount; $i++)
-        {
+        $testCases = 0..($maxCount - 1) | ForEach-Object {
+            $idx = $_
+            @{
+                i = $idx
+                expectedTotal = (0..$idx | Measure-Object -Sum).Sum
+            }
+        }
+        }
+        Context 'with <i> arguments (expected: <expectedTotal>)' -ForEach $testCases {
+        BeforeAll {
             $properties = $(for ($j = 0; $j -le $i; $j++) {
                 "        [int]`$Prop$j"
             }) -join "`n"
@@ -614,8 +657,6 @@ Describe 'TestMultipleArguments Test' -Tags "CI" {
                 "`$inst.`Prop$j"
             }) -join " + "
 
-            $expectedTotal = (0..$i | Measure-Object -Sum).Sum
-
             $class = @"
     class Foo
     {
@@ -634,15 +675,18 @@ $ctorAssignments
 
     `$inst = [Foo]::new($methodArguments)
     `$sum = $addUpProperties
-    It "ExpectedTotal: Sum should be $expectedTotal" { `$sum | Should -Be $expectedTotal }
-    It "ExpectedTotal: Invocation should return $expectedTotal" { `$inst.DoSomething($methodArguments) | Should -Be $expectedTotal }
+    `$methodResult = `$inst.DoSomething($methodArguments)
 "@
 
             Invoke-Expression $class
         }
+        It "ExpectedTotal: Sum should be <expectedTotal>" { $sum | Should -Be $expectedTotal }
+        It "ExpectedTotal: Invocation should return <expectedTotal>" { $methodResult | Should -Be $expectedTotal }
+        }
 }
 
 Describe 'Scopes Test' -Tags "CI" {
+        BeforeAll {
         class C1
         {
             static C1() {
@@ -658,18 +702,23 @@ Describe 'Scopes Test' -Tags "CI" {
                 return $script:bar + $global:bar
             }
         }
+        }
 }
 
 Describe 'Check PS Class Assembly Test' -Tags "CI" {
+        BeforeAll {
         class C1 {}
         $assem = [C1].Assembly
         $attrs = @($assem.GetCustomAttributes($true))
         $expectedAttr = @($attrs | Where-Object { $_  -is [System.Management.Automation.DynamicClassImplementationAssemblyAttribute] })
+        }
         It "Expected a DynamicClassImplementationAssembly attribute" { $expectedAttr.Length | Should -Be 1}
 }
 
 Describe 'ScriptScopeAccessFromClassMethod' -Tags "CI" {
+        BeforeAll {
         Import-Module "$PSScriptRoot\MSFT_778492.psm1"
+        }
         try
         {
             $c = Get-MSFT_778492
@@ -695,6 +744,7 @@ Describe 'Hidden Members Test ' -Tags "CI" {
         }
     }
 
+        BeforeAll {
         class C1
         {
             [int]$visibleX
@@ -704,6 +754,7 @@ Describe 'Hidden Members Test ' -Tags "CI" {
 
         # Create an instance
         $instance = [C1]@{ visibleX = 10; visibleY = 12; hiddenZ = 42 }
+        }
 
         It "Access hidden property should still work" { $instance.hiddenZ | Should -Be 42 }
 
@@ -722,16 +773,22 @@ visibleX visibleY
         }
 
         # Get-Member should not include hidden members by default
+        BeforeAll {
         $member = $instance | Get-Member hiddenZ
+        }
         It "Get-Member should not find hidden member w/o -Force" { $member | Should -BeNullOrEmpty }
 
         # Get-Member should include hidden members with -Force
+        BeforeAll {
         $member = $instance | Get-Member hiddenZ -Force
+        }
         It "Get-Member should find hidden member w/ -Force" { $member | Should -Not -BeNullOrEmpty }
 
         # Tab completion should not return a hidden member
+        BeforeAll {
         $line = 'class C2 { hidden [int]$hiddenZ } [C2]::new().h'
         $completions = [System.Management.Automation.CommandCompletion]::CompleteInput($line, $line.Length, $null)
+        }
         It "Tab completion should not return a hidden member" { $completions.CompletionMatches.Count | Should -Be 0 }
 }
 
@@ -742,6 +799,7 @@ Describe 'BaseMethodCall Test ' -Tags "CI" {
 }
 
 Describe 'Scoped Types Test' -Tags "CI" {
+        BeforeAll {
         class C1 { [string] GetContext() { return "Test scope" } }
 
         filter f1
@@ -756,6 +814,7 @@ Describe 'Scoped Types Test' -Tags "CI" {
             class C1 { [string] GetContext() { return "f2 scope" } }
 
             return (New-Object C1).GetContext()
+        }
         }
 
         It "New-Object at test scope" { (New-Object C1).GetContext() | Should -BeExactly "Test scope" }
@@ -854,6 +913,7 @@ class Derived : Base
 Describe 'TypeTable lookups' -Tags "CI" {
 
     Context 'Call methods from a different thread' {
+        BeforeAll {
         $b = [powershell]::Create().AddScript(
 @'
 class A {}
@@ -866,6 +926,7 @@ class B
 [B]::new()
 
 '@).Invoke()[0]
+        }
 
         It 'can do type lookup by name' {
             $b.getA1() | Should -BeExactly 'A'
@@ -879,6 +940,7 @@ class B
 
 Describe 'Protected method access' -Tags "CI" {
 
+    BeforeAll {
     Add-Type @'
 namespace Foo
 {
@@ -888,6 +950,7 @@ namespace Foo
     }
 }
 '@
+    }
 
      It 'doesn''t allow protected methods access outside of inheritance chain' {
         $a = [scriptblock]::Create(@'

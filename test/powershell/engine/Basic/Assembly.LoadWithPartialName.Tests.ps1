@@ -3,6 +3,7 @@
 
 Describe "Assembly::LoadWithPartialName Validation Test" -Tags "CI" {
 
+    BeforeDiscovery {
     $defaultErrorId = 'FileLoadException'
     $testcases = @(
         # verify winforms is blocked
@@ -18,6 +19,7 @@ Describe "Assembly::LoadWithPartialName Validation Test" -Tags "CI" {
             ErrorId = $defaultErrorId
         }
     )
+    }
 
     # All existing cases should fail on all platforms either because it doesn't exist or
     # because the assembly is blacklisted

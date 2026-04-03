@@ -13,6 +13,7 @@ $script:catalogPath = ""
 Describe "Test suite for NewFileCatalogAndTestFileCatalogCmdlets" -Tags "CI" {
 
     #compare two hashtables
+    BeforeAll {
     function CompareHashTables
     {
         param
@@ -34,6 +35,7 @@ Describe "Test suite for NewFileCatalogAndTestFileCatalogCmdlets" -Tags "CI" {
                 throw "Failed to find the file $keyValue1 for $key in Hashtable"
             }
         }
+    }
     }
 
     BeforeAll {

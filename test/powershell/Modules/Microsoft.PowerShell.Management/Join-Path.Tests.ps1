@@ -1,15 +1,18 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 Describe "Join-Path cmdlet tests" -Tags "CI" {
+  BeforeDiscovery {
   $SepChar=[io.path]::DirectorySeparatorChar
+  }
   BeforeAll {
+    $SepChar=[io.path]::DirectorySeparatorChar
     $StartingLocation = Get-Location
   }
   AfterEach {
     Set-Location $StartingLocation
   }
   It "should output multiple paths when called with multiple -Path targets" {
-    Setup -Dir SubDir1
+    New-Item -Path (Join-Path $TestDrive 'SubDir1') -ItemType Directory -Force > $null
     (Join-Path -Path TestDrive:,$TestDrive -ChildPath "SubDir1" -Resolve).Length | Should -Be 2
   }
   It "should throw 'DriveNotFound' when called with -Resolve and drive does not exist" {
@@ -84,6 +87,7 @@ Describe "Join-Path cmdlet tests" -Tags "CI" {
     $result = Join-Path -Path $Path -ChildPath $ChildPath
     $result | Should -BeExactly $ExpectedResult
   }
+<<<<<<< HEAD
   It "should handle extension parameter: <TestName>" -TestCases @(
     @{
       TestName = "change extension"
@@ -183,3 +187,6 @@ Describe "Join-Path cmdlet tests" -Tags "CI" {
     $result | Should -BeExactly "folder${SepChar}file.log"
   }
 }
+=======
+}
+>>>>>>> c213a5d06 (Migrate Pester tests from v4 to v5)

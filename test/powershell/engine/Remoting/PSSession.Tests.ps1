@@ -61,6 +61,7 @@ Describe "SkipCACheck and SkipCNCheck PSSession options are required for New-PSS
         $global:PSDefaultParameterValues = $originalDefaultParameterValues
     }
 
+    BeforeDiscovery {
     $testCases = @(
         @{
             Name = 'Verifies expected error when session option is missing'
@@ -78,6 +79,7 @@ Describe "SkipCACheck and SkipCNCheck PSSession options are required for New-PSS
             ExpectedErrorCode = 825
         }
     )
+    }
 
     It "<Name>" -TestCases $testCases {
         param ($scriptBlock, $expectedErrorCode)

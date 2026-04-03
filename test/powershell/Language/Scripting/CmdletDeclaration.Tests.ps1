@@ -1,6 +1,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 Describe "Cmdlet declaration statement" -Tags "CI" {
+    BeforeDiscovery {
     $testData = @(
         @{ Name = 'Verify non-cmdlet formatted names are allowed';
            Script = '
@@ -107,6 +108,7 @@ Describe "Cmdlet declaration statement" -Tags "CI" {
                     param([Parameter(mandatory=$true)]$a)
                     $a
                 }'})
+    }
 
         It '<Name>' -TestCases $testData {
             param($Name, $script)
@@ -119,4 +121,3 @@ Describe "Cmdlet declaration statement" -Tags "CI" {
             $syntaxerrors.Count | Should -Be 0
         }
 }
-

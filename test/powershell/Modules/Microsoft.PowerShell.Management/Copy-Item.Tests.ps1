@@ -35,6 +35,7 @@ Describe "Validate Copy-Item Remotely" -Tags "CI" {
     # Validate a copy item operation.
     # $filePath is the source file path
     #
+    BeforeAll {
     function ValidateCopyItemOperation
     {
         param ([string]$filePath, [string]$destination)
@@ -80,6 +81,7 @@ Describe "Validate Copy-Item Remotely" -Tags "CI" {
         # Validate the stream
         $actualStreamContent = Get-Content -Path $copiedFilePath -Stream $streamName -ErrorAction SilentlyContinue
         $actualStreamContent | Should -Match $expectedStreamContent
+    }
     }
 
     BeforeAll {
@@ -577,76 +579,78 @@ Describe "Validate Copy-Item Remotely" -Tags "CI" {
             }
         }
 
-        $invalidSourcePathtestCases = @(
-            @{
-                Path = "HKLM:\SOFTWARE"
-                Destination = $env:SystemDrive
-                ExpectedFullyQualifiedErrorId = "NamedParameterNotFound,Microsoft.PowerShell.Commands.CopyItemCommand"
-                FromSession = $true
-            }
-            @{
-                Path = ".\Source"
-                Destination = $env:SystemDrive
-                ExpectedFullyQualifiedErrorId = "RemotePathIsNotAbsolute,Microsoft.PowerShell.Commands.CopyItemCommand"
-                FromSession = $true
-            }
-            @{
-                Path = $env:SystemDrive + "\X\Y\Z"
-                Destination = $env:SystemDrive + "\A\B\C"
-                ExpectedFullyQualifiedErrorId = "RemotePathNotFound,Microsoft.PowerShell.Commands.CopyItemCommand"
-                FromSession = $true
-            }
-            @{
-                Path = $null
-                Destination = $env:SystemDrive
-                ExpectedFullyQualifiedErrorId = "ParameterArgumentValidationErrorNullNotAllowed,Microsoft.PowerShell.Commands.CopyItemCommand"
-                FromSession = $true
-            }
-            @{
-                Path = ''
-                Destination = $env:SystemDrive
-                ExpectedFullyQualifiedErrorId = "ParameterArgumentValidationErrorEmptyStringNotAllowed,Microsoft.PowerShell.Commands.CopyItemCommand"
-                FromSession = $true
-            }
-            @{
-                Path = "$env:SystemDrive\nonexistdir\*"
-                Destination = "$env:SystemDrive\psTest"
-                ExpectedFullyQualifiedErrorId = "RemotePathNotFound,Microsoft.PowerShell.Commands.CopyItemCommand"
-                FromSession = $true
-            }
-        )
+        BeforeDiscovery {
+            $testFilePath = Join-Path "TestDrive:" "testfile.txt"
+            $invalidSourcePathtestCases = @(
+                @{
+                    Path = "HKLM:\SOFTWARE"
+                    Destination = $env:SystemDrive
+                    ExpectedFullyQualifiedErrorId = "NamedParameterNotFound,Microsoft.PowerShell.Commands.CopyItemCommand"
+                    FromSession = $true
+                }
+                @{
+                    Path = ".\Source"
+                    Destination = $env:SystemDrive
+                    ExpectedFullyQualifiedErrorId = "RemotePathIsNotAbsolute,Microsoft.PowerShell.Commands.CopyItemCommand"
+                    FromSession = $true
+                }
+                @{
+                    Path = $env:SystemDrive + "\X\Y\Z"
+                    Destination = $env:SystemDrive + "\A\B\C"
+                    ExpectedFullyQualifiedErrorId = "RemotePathNotFound,Microsoft.PowerShell.Commands.CopyItemCommand"
+                    FromSession = $true
+                }
+                @{
+                    Path = $null
+                    Destination = $env:SystemDrive
+                    ExpectedFullyQualifiedErrorId = "ParameterArgumentValidationErrorNullNotAllowed,Microsoft.PowerShell.Commands.CopyItemCommand"
+                    FromSession = $true
+                }
+                @{
+                    Path = ''
+                    Destination = $env:SystemDrive
+                    ExpectedFullyQualifiedErrorId = "ParameterArgumentValidationErrorEmptyStringNotAllowed,Microsoft.PowerShell.Commands.CopyItemCommand"
+                    FromSession = $true
+                }
+                @{
+                    Path = "$env:SystemDrive\nonexistdir\*"
+                    Destination = "$env:SystemDrive\psTest"
+                    ExpectedFullyQualifiedErrorId = "RemotePathNotFound,Microsoft.PowerShell.Commands.CopyItemCommand"
+                    FromSession = $true
+                }
+            )
+            $invalidDestinationPathtestCases = @(
+                @{
+                    Path = $testFilePath
+                    Destination = ".\Source"
+                    ExpectedFullyQualifiedErrorId = "RemotePathIsNotAbsolute,Microsoft.PowerShell.Commands.CopyItemCommand"
+                }
+                @{
+                    Path = $testFilePath
+                    Destination = $env:SystemDrive + "\X\A\B\C"
+                    ExpectedFullyQualifiedErrorId = "RemotePathNotFound,Microsoft.PowerShell.Commands.CopyItemCommand"
+                }
+                @{
+                    Path = $testFilePath
+                    Destination = $null
+                    ExpectedFullyQualifiedErrorId = "CopyItemRemoteDestinationIsNullOrEmpty,Microsoft.PowerShell.Commands.CopyItemCommand"
+                }
+                @{
+                    Path = $testFilePath
+                    Destination = ""
+                    ExpectedFullyQualifiedErrorId = "CopyItemRemoteDestinationIsNullOrEmpty,Microsoft.PowerShell.Commands.CopyItemCommand"
+                }
+                @{
+                    Path = "$env:SystemDrive\nonexistdir\*"
+                    Destination = "$env:SystemDrive\psTest"
+                    ExpectedFullyQualifiedErrorId = "PathNotFound,Microsoft.PowerShell.Commands.CopyItemCommand"
+                }
+            )
+        }
 
         foreach ($testCase in $invalidSourcePathtestCases) {
            Test-CopyItemError @testCase
         }
-
-        $invalidDestinationPathtestCases = @(
-            @{
-                Path = $testFilePath
-                Destination = ".\Source"
-                ExpectedFullyQualifiedErrorId = "RemotePathIsNotAbsolute,Microsoft.PowerShell.Commands.CopyItemCommand"
-            }
-            @{
-                Path = $testFilePath
-                Destination = $env:SystemDrive + "\X\A\B\C"
-                ExpectedFullyQualifiedErrorId = "RemotePathNotFound,Microsoft.PowerShell.Commands.CopyItemCommand"
-            }
-            @{
-                Path = $testFilePath
-                Destination = $null
-                ExpectedFullyQualifiedErrorId = "CopyItemRemoteDestinationIsNullOrEmpty,Microsoft.PowerShell.Commands.CopyItemCommand"
-            }
-            @{
-                Path = $testFilePath
-                Destination = ""
-                ExpectedFullyQualifiedErrorId = "CopyItemRemoteDestinationIsNullOrEmpty,Microsoft.PowerShell.Commands.CopyItemCommand"
-            }
-            @{
-                Path = "$env:SystemDrive\nonexistdir\*"
-                Destination = "$env:SystemDrive\psTest"
-                ExpectedFullyQualifiedErrorId = "PathNotFound,Microsoft.PowerShell.Commands.CopyItemCommand"
-            }
-        )
 
         foreach ($testCase in $invalidDestinationPathtestCases) {
            Test-CopyItemError @testCase

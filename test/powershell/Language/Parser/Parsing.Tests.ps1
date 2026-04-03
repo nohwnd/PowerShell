@@ -3,6 +3,7 @@
 Set-StrictMode -v 2
 
 Describe 'for statement parsing' -Tags "CI" {
+    BeforeAll {
     ShouldBeParseError 'for' MissingOpenParenthesisAfterKeyword 4 -CheckColumnNumber
     ShouldBeParseError 'for(' MissingEndParenthesisAfterStatement 5 -CheckColumnNumber
     ShouldBeParseError 'for(;' MissingEndParenthesisAfterStatement 6 -CheckColumnNumber
@@ -47,9 +48,11 @@ Describe 'for statement parsing' -Tags "CI" {
     Test-ErrorStmt ':lab for($a;$b;$c'  ':lab for($a;$b;$c' '$a' '$a' '$a' '$b' '$b' '$b' '$c' '$c' '$c'
     Test-ErrorStmt ':lab for($a;$b;$c)' ':lab for($a;$b;$c)' '$a' '$a' '$a' '$b' '$b' '$b' '$c' '$c' '$c'
     Test-ErrorStmt ':lab for()zzzz'     ':lab for()'
+    }
 }
 
 Describe 'foreach statement parsing' -Tags "CI" {
+    BeforeAll {
     ShouldBeParseError 'foreach' MissingOpenParenthesisAfterKeyword 7
     ShouldBeParseError 'foreach (' MissingVariableNameAfterForeach 9
     ShouldBeParseError 'foreach ($a' MissingInInForeach 11
@@ -85,9 +88,11 @@ Describe 'foreach statement parsing' -Tags "CI" {
     Test-ErrorStmt ':lab foreach ($a in'             ':lab foreach ($a in' '$a'
     Test-ErrorStmt ':lab foreach ($a in $b'          ':lab foreach ($a in $b' '$a' '$b' '$b' '$b'
     Test-ErrorStmt ':lab foreach ($a in $b <#hmm#>)' ':lab foreach ($a in $b <#hmm#>)' '$a' '$b' '$b' '$b'
+    }
 }
 
 Describe 'do/while statement statement parsing' -Tags "CI" {
+    BeforeAll {
     ShouldBeParseError 'do' MissingLoopStatement 2
     ShouldBeParseError 'do {}' MissingWhileOrUntilInDoWhile 5
     ShouldBeParseError 'do {} while' MissingOpenParenthesisAfterKeyword 11
@@ -109,9 +114,11 @@ Describe 'do/while statement statement parsing' -Tags "CI" {
     Test-ErrorStmt ':lab do {1} while'        ':lab do {1} while' '{1}' '1' '1' '1'
     Test-ErrorStmt ':lab do {1} while('       ':lab do {1} while(' '{1}' '1' '1' '1'
     Test-ErrorStmt ':lab do {1} while($false' ':lab do {1} while($false' '{1}' '1' '1' '1' '$false' '$false' '$false'
+    }
 }
 
 Describe 'do/while statement statement parsing' -Tags "CI" {
+    BeforeAll {
     ShouldBeParseError 'do' MissingLoopStatement 3 -CheckColumnNumber
     ShouldBeParseError 'do {}' MissingWhileOrUntilInDoWhile 6 -CheckColumnNumber
     ShouldBeParseError 'do {} until' MissingOpenParenthesisAfterKeyword 12 -CheckColumnNumber
@@ -133,18 +140,22 @@ Describe 'do/while statement statement parsing' -Tags "CI" {
     Test-ErrorStmt ':lab do {1} until'        ':lab do {1} until' '{1}' '1' '1' '1'
     Test-ErrorStmt ':lab do {1} until('       ':lab do {1} until(' '{1}' '1' '1' '1'
     Test-ErrorStmt ':lab do {1} until($false' ':lab do {1} until($false' '{1}' '1' '1' '1' '$false' '$false' '$false'
+    }
 }
 
 Describe 'trap statement parsing' -Tags "CI" {
 
+    BeforeAll {
     ShouldBeParseError 'trap' MissingTrapStatement 4
     ShouldBeParseError 'trap [int]' MissingTrapStatement 11 -CheckColumnNumber
 
     Test-ErrorStmt 'trap' 'trap'
     Test-ErrorStmt 'trap [int]' 'trap [int]' '[int]'
+    }
 }
 
 Describe 'named blocks parsing' -Tags "CI" {
+    BeforeAll {
     ShouldBeParseError 'begin' MissingNamedStatementBlock 5
     ShouldBeParseError 'process' MissingNamedStatementBlock 7
     ShouldBeParseError 'end' MissingNamedStatementBlock 3
@@ -163,12 +174,14 @@ Describe 'named blocks parsing' -Tags "CI" {
     Test-Ast 'begin {} end' 'begin {} end' 'begin {}' 'end'
     Test-Ast 'begin process end clean' 'begin process end clean' 'begin' 'clean' 'end' 'process'
     Test-Ast 'begin {} process end clean {}' 'begin {} process end clean {}' 'begin {}' 'clean {}' 'end' 'process'
+    }
 }
 
 #
 # data statement
 #
 Describe 'data statement parsing' -Tags "CI" {
+    BeforeAll {
     ShouldBeParseError 'data' MissingStatementBlockForDataSection 5 -CheckColumnNumber
     ShouldBeParseError 'data foo' MissingStatementBlockForDataSection 9 -CheckColumnNumber
     ShouldBeParseError 'data -abc' InvalidParameterForDataSectionStatement 6 -CheckColumnNumber
@@ -187,12 +200,14 @@ Describe 'data statement parsing' -Tags "CI" {
     Test-ErrorStmt 'data -s abc' 'data -s abc' 'abc'
     Test-ErrorStmt 'data -s abc,' 'data -s abc,' 'abc'
     Test-ErrorStmt 'data -s a,b' 'data -s a,b' 'a' 'b'
+    }
 }
 
 #
 # try/catch/finally statement
 #
 Describe 'try/catch/finally statement parsing' -Tags "CI" {
+    BeforeAll {
     ShouldBeParseError 'try' MissingTryStatementBlock 3
     ShouldBeParseError 'try {}' MissingCatchOrFinally 6
     ShouldBeParseError 'try {} catch' MissingCatchHandlerBlock 12
@@ -214,9 +229,11 @@ Describe 'try/catch/finally statement parsing' -Tags "CI" {
     Test-ErrorStmt 'try {1} catch {2} catch'               'try {1} catch {2} catch' '{1}' '1' '1' '1' 'catch {2}' '{2}' '2' '2' '2'
     Test-ErrorStmt 'try {1} catch [int],[char] {2} catch'  'try {1} catch [int],[char] {2} catch' '{1}' '1' '1' '1' 'catch [int],[char] {2}' '{2}' '2' '2' '2' '[int]' '[char]'
     Test-ErrorStmt 'try {1} catch [int],'                  'try {1} catch [int],' '{1}' '1' '1' '1' '[int]'
+    }
 }
 
 Describe 'switch statement parsing' -Tags "CI" {
+    BeforeAll {
     ShouldBeParseError 'switch' PipelineValueRequired 6
     ShouldBeParseError 'switch -abc' InvalidSwitchFlag,PipelineValueRequired 7,11
     ShouldBeParseError 'switch -file' MissingFilenameOption 12
@@ -242,9 +259,11 @@ Describe 'switch statement parsing' -Tags "CI" {
     Test-ErrorStmt 'switch (1) {foo}'      'switch (1) {foo' 'foo' '1' '1' '1'
     Test-ErrorStmt 'switch (1) {foo {bar}' 'switch (1) {foo {bar}' 'foo' '{bar}' 'bar' 'bar' 'bar' '1' '1' '1'
     Test-ErrorStmt 'switch (1) {default {9} default{2}' 'switch (1) {default {9} default{2}' 'default' '{9}' '9' '9' '9' 'default' '{2}' '2' '2' '2' '1' '1' '1'
+    }
 }
 
 Describe 'function statement parsing' -Tags "CI" {
+    BeforeAll {
     ShouldBeParseError 'function' MissingNameAfterKeyword 8
     ShouldBeParseError 'function foo' MissingFunctionBody 12
     ShouldBeParseError 'function foo(' MissingEndParenthesisInFunctionParameterList 13
@@ -260,29 +279,37 @@ Describe 'function statement parsing' -Tags "CI" {
     Test-ErrorStmt 'function foo($a' 'function foo($a' '$a' '$a'
     Test-ErrorStmt 'function foo($a 1' 'function foo($a' '$a' '$a'
     Test-ErrorStmt 'function foo($a = 1' 'function foo($a = 1' '$a = 1' '1' '$a'
+    }
 }
 
 Describe 'assignment statement parsing' -Tags "CI" {
+    BeforeAll {
     ShouldBeParseError '$a,$b += 1,2' InvalidLeftHandSide 0
+    }
 }
 
 Describe 'null coalescing assignment statement parsing' -Tag 'CI' {
+    BeforeAll {
     ShouldBeParseError '1 ??= 1' InvalidLeftHandSide 0
     ShouldBeParseError '@() ??= 1' InvalidLeftHandSide 0
     ShouldBeParseError '@{} ??= 1' InvalidLeftHandSide 0
     ShouldBeParseError '1..2 ??= 1' InvalidLeftHandSide 0
     ShouldBeParseError '[int] ??= 1' InvalidLeftHandSide 0
     ShouldBeParseError '$cricket ?= $soccer' ExpectedValueExpression,InvalidLeftHandSide 10,0
+    }
 }
 
 Describe 'null coalescing statement parsing' -Tag "CI" {
+    BeforeAll {
     ShouldBeParseError '$x??=' ExpectedValueExpression 5
     ShouldBeParseError '$x ??Get-Thing' ExpectedValueExpression,UnexpectedToken 5,5
     ShouldBeParseError '$??=$false' ExpectedValueExpression,InvalidLeftHandSide 3,0
     ShouldBeParseError '$hello ??? $what' ExpectedValueExpression,MissingColonInTernaryExpression 9,17
+    }
 }
 
 Describe 'null conditional member access statement parsing' -Tag 'CI' {
+    BeforeAll {
     ShouldBeParseError '[datetime]?::now' ExpectedValueExpression, UnexpectedToken 11, 11
     ShouldBeParseError '$x ?.name' ExpectedValueExpression, UnexpectedToken 4, 4
     ShouldBeParseError 'Get-Date ?.ToString()' ExpectedExpression 20
@@ -295,48 +322,62 @@ Describe 'null conditional member access statement parsing' -Tag 'CI' {
     ShouldBeParseError '${x}?[-]' MissingExpressionAfterOperator 7
     ShouldBeParseError '${x}?[             ]' MissingArrayIndexExpression 6
     ShouldBeParseError '${x}?[0] = 1' InvalidLeftHandSide 0
+    }
 }
 
 Describe 'splatting parsing' -Tags "CI" {
+    BeforeAll {
     ShouldBeParseError '@a' SplattingNotPermitted 0
     ShouldBeParseError 'foreach (@a in $b) {}' SplattingNotPermitted 9
     ShouldBeParseError 'param(@a)' SplattingNotPermitted 6
     ShouldBeParseError 'function foo (@a) {}' SplattingNotPermitted 14
+    }
 }
 
 Describe 'Pipes parsing' -Tags "CI" {
+    BeforeAll {
     ShouldBeParseError '|gps' EmptyPipeElement 0
     ShouldBeParseError 'gps|' EmptyPipeElement 4
     ShouldBeParseError 'gps| |foreach name' EmptyPipeElement 4
     ShouldBeParseError '1|1' ExpressionsMustBeFirstInPipeline 2
     ShouldBeParseError '$a=' ExpectedValueExpression 3
+    }
 }
 
 Describe 'commands parsing' -Tags "CI" {
+    BeforeAll {
     ShouldBeParseError 'gcm -a:' ParameterRequiresArgument 7
     ShouldBeParseError 'gcm -a: 1,' MissingExpression 11 -CheckColumnNumber
     ShouldBeParseError 'gcm ,' MissingArgument 4
+    }
 }
 
 Describe 'tokens parsing' -Tags "CI" {
+    BeforeAll {
     ShouldBeParseError '   )' UnexpectedToken 3
     ShouldBeParseError '   }' UnexpectedToken 4 -CheckColumnNumber
+    }
 }
 
 Describe 'expressions parsing' -Tags "CI" {
+    BeforeAll {
     ShouldBeParseError '1+' ExpectedValueExpression 2
     ShouldBeParseError '[a()][b]' UnexpectedAttribute 0
     ShouldBeParseError '[a()][b]2' UnexpectedAttribute 0
     ShouldBeParseError '[ref][ref]$x' ReferenceNeedsToBeByItselfInTypeSequence 5
     ShouldBeParseError '[int][ref]$x' ReferenceNeedsToBeLastTypeInTypeConversion 5
     ShouldBeParseError '[int][ref]$x = 42' ReferenceNeedsToBeByItselfInTypeConstraint 5
+    }
 }
 
 Describe 'Hash Expression parsing' -Tags "CI" {
+    BeforeAll {
     ShouldBeParseError '@{ a=1;b=2;c=3;' MissingEndCurlyBrace 2
+    }
 }
 
 Describe 'Unicode escape sequence parsing' -Tag "CI" {
+    BeforeAll {
     ShouldBeParseError '"`u{}"' InvalidUnicodeEscapeSequence 1                 # error span is >>`u{}<<
     ShouldBeParseError '"`u{219z}"' InvalidUnicodeEscapeSequence 7             # error offset is "`u{219>>z<<}"
     ShouldBeParseError '"`u{12345z}"' InvalidUnicodeEscapeSequence 9           # error offset is "`u{12345>>z<<}"
@@ -347,6 +388,7 @@ Describe 'Unicode escape sequence parsing' -Tag "CI" {
     ShouldBeParseError '"`u{1' InvalidUnicodeEscapeSequence,TerminatorExpectedAtEndOfString 5,0
     ShouldBeParseError '"`u{123456' MissingUnicodeEscapeSequenceTerminator,TerminatorExpectedAtEndOfString 10,0
     ShouldBeParseError '"`u{1234567' TooManyDigitsInUnicodeEscapeSequence,TerminatorExpectedAtEndOfString 10,0
+    }
 }
 
 Describe "Ternary Operator parsing" -Tags CI {
@@ -611,12 +653,14 @@ Describe "Keywords 'default', 'hidden', 'in', 'static' Token parsing" -Tags CI {
         }
     }
 
+    BeforeDiscovery {
     $testKeywordsAsCmds = @(
         @{ Keyword = 'default' }
         @{ Keyword = 'hidden' }
         @{ Keyword = 'in' }         # Note: this overwrites Pester's `In` function.
         @{ Keyword = 'static' }
     )
+    }
 
     It "<Keyword> can be used as command name" -TestCases $testKeywordsAsCmds {
         param($Keyword)

@@ -622,6 +622,7 @@ Describe "Validate Json serialization" -Tags "CI" {
 
     Context "Validate Json serialization ascii values" {
 
+        BeforeDiscovery {
         $testCases = @(
             @{
                 TestInput = 0
@@ -1264,6 +1265,7 @@ Describe "Validate Json serialization" -Tags "CI" {
                 FromJson = ''
              }
         )
+        }
 
         function ValidateJsonSerializationForAsciiValues
         {
@@ -1298,6 +1300,7 @@ Describe "Validate Json serialization" -Tags "CI" {
 
     Context "Validate Json serialization for types" {
 
+        BeforeDiscovery {
         $testCases = @(
 
             ## Decimal types - Decimals are a 128-bit data type
@@ -1485,6 +1488,7 @@ Describe "Validate Json serialization" -Tags "CI" {
                 ToJson = [double]::MinValue
             }
         )
+        }
 
         function ValidateJsonSerialization
         {
@@ -1516,6 +1520,7 @@ Describe "Validate Json serialization" -Tags "CI" {
 
     Context "Validate Json Serialization for 'Get-CimClass' and 'Get-Command'" {
 
+        BeforeAll {
         function ValidateProperties
         {
             param (
@@ -1544,6 +1549,7 @@ Describe "Validate Json serialization" -Tags "CI" {
                     }
                 }
             }
+        }
         }
 
         It "Validate that CimClass Properties for win32_bios can be serialized using ConvertTo-Json and ConvertFrom-Json" -Skip {
@@ -1670,6 +1676,7 @@ Describe "Json Bug fixes"  -Tags "Feature" {
         }
     }
 
+    BeforeDiscovery {
     $testCases = @(
         @{
             Name = "ConvertTo-Json -Depth 101 throws ParameterArgumentValidationError when the user specifies a depth greater than 100."
@@ -1691,6 +1698,7 @@ Describe "Json Bug fixes"  -Tags "Feature" {
             ShouldThrow = $false
         }
     )
+    }
 
     foreach ($testCase in $testCases)
     {

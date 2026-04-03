@@ -1,8 +1,11 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 Describe "Import-Module" -Tags "CI" {
+    BeforeDiscovery {
     $moduleName = "Microsoft.PowerShell.Security"
+    }
     BeforeAll {
+    $moduleName = "Microsoft.PowerShell.Security"
         $originalPSModulePath = $env:PSModulePath
         New-Item -ItemType Directory -Path "$testdrive\Modules\TestModule\1.1" -Force > $null
         New-Item -ItemType Directory -Path "$testdrive\Modules\TestModule\2.0" -Force > $null
@@ -98,12 +101,14 @@ Describe "Import-Module with ScriptsToProcess" -Tags "CI" {
         Remove-Item out.txt -Force -ErrorAction SilentlyContinue
     }
 
+    BeforeDiscovery {
     $testCases = @(
             @{ TestNameSuffix = 'for top-level module'; ipmoParms =  @{'Name'='.\module1.psd1'}; Expected = '1' }
             @{ TestNameSuffix = 'for top-level and nested module'; ipmoParms =  @{'Name'='.\module2.psd1'}; Expected = '21' }
             @{ TestNameSuffix = 'for top-level module when -Version is specified'; ipmoParms =  @{'Name'='.\module1.psd1'; 'Version'='0.0.1'}; Expected = '1' }
             @{ TestNameSuffix = 'for top-level and nested module when -Version is specified'; ipmoParms =  @{'Name'='.\module2.psd1'; 'Version'='0.0.1'}; Expected = '21' }
         )
+    }
 
     It "Verify ScriptsToProcess are executed <TestNameSuffix>" -TestCases $testCases {
         param($TestNameSuffix,$ipmoParms,$Expected)

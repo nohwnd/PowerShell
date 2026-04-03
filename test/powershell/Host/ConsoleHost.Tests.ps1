@@ -1087,6 +1087,7 @@ public enum ShowWindowCommands : int
 
 Describe "Console host api tests" -Tag CI {
     Context "String escape and control sequences" {
+        BeforeDiscovery {
         $esc = [char]0x1b
         $csi = [char]0x9b
         $testCases =
@@ -1122,6 +1123,7 @@ Describe "Console host api tests" -Tag CI {
             @{InputObject = "abc${csi}#q"; Length = 6; Name = "C1 CSI, XTPOPSGR (alias) - no virtual term support"}
             @{InputObject = "abc${esc}[0#p"; Length = 8; Name = "XTPUSHSGR, with param - no virtual term support"}
             @{InputObject = "${esc}[0;1#qabc"; Length = 10; Name = "XTPOPSGR, with multiple params - no virtual term support"}
+        }
         }
 
         It "Should properly calculate buffer cell width of '<Name>'" -TestCases $testCases {
@@ -1235,6 +1237,7 @@ Describe 'TERM env var' -Tag CI {
             $env:NO_COLOR = $null
         }
     }
+<<<<<<< HEAD
 
     It 'No_COLOR should be respected for redirected output' {
         $psi =  [System.Diagnostics.ProcessStartInfo] @{
@@ -1251,3 +1254,6 @@ Describe 'TERM env var' -Tag CI {
         $ps.StandardError.ReadToEnd() | Should -Not -Contain '\e'
     }
 }
+=======
+}
+>>>>>>> c213a5d06 (Migrate Pester tests from v4 to v5)

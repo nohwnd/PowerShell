@@ -3,11 +3,13 @@
 
 Describe 'enums' -Tags "CI" {
     Context 'basic enums' {
+        BeforeAll {
         enum E1
         {
             e0
             e1
             e2
+        }
         }
 
         It "has correct value 0" { [E1]::e0 | Should -Be ([E1]0) }
@@ -18,11 +20,13 @@ Describe 'enums' -Tags "CI" {
     }
 
     Context 'Basic enum with initial value' {
+        BeforeAll {
         enum E2
         {
             e0
             e1 = 5
             e2
+        }
         }
 
         It "has correct value 0" { [E2]::e0 | Should -Be ([E2]0) }
@@ -33,12 +37,14 @@ Describe 'enums' -Tags "CI" {
     }
 
     Context 'Basic enum with initial value expression' {
+        BeforeAll {
         enum E3
         {
             e0
             e1 = 5
             e2 = [int]::MaxValue
             e3 = 1    # This shouldn't be an error even though previous member was max int
+        }
         }
 
         It "has correct value 0"               { [E3]::e0 | Should -Be ([E3]0) }
@@ -50,6 +56,7 @@ Describe 'enums' -Tags "CI" {
     }
 
     Context 'Enum with complicated initial value' {
+        BeforeAll {
         enum E4
         {
             e0 = [E5]::e0 + 2
@@ -65,6 +72,7 @@ Describe 'enums' -Tags "CI" {
         {
             e0 =38
         }
+        }
 
         It 'E4 has correct value' { [E4]::e0 | Should -Be ([E4]42) }
         It 'E5 has correct value' { [E5]::e0 | Should -Be ([E5]40) }
@@ -72,6 +80,7 @@ Describe 'enums' -Tags "CI" {
     }
 
     Context 'Enum with non-default underlying type' {
+        BeforeAll {
         enum EX1 : byte { A;B;C;D }
         enum EX2 : sbyte { A;B;C;D }
         enum EX3 : short { A;B;C;D }
@@ -80,6 +89,7 @@ Describe 'enums' -Tags "CI" {
         enum EX6 : uint { A;B;C;D }
         enum EX7 : long { A;B;C;D }
         enum EX8 : ulong { A;B;C;D }
+        }
 
         It 'EX1 has the specified underlying type' { [Enum]::GetUnderlyingType([EX1]) | Should -Be ([byte]) }
         It 'EX2 has the specified underlying type' { [Enum]::GetUnderlyingType([EX2]) | Should -Be ([sbyte]) }
@@ -92,10 +102,12 @@ Describe 'enums' -Tags "CI" {
     }
 
     Context 'Enum with negative user-specified values' {
+        BeforeAll {
         enum V1 {
             A = -4
             B = [int]::MinValue
             C
+        }
         }
 
         It 'Negative values are correctly assigned to members' {
@@ -107,6 +119,7 @@ Describe 'enums' -Tags "CI" {
 }
 
 Describe 'Basic enum errors' -Tags "CI" {
+    BeforeAll {
     ShouldBeParseError 'enum' MissingNameAfterKeyword 4
     ShouldBeParseError 'enum foo' MissingTypeBody 8
     ShouldBeParseError 'enum foo {' MissingEndCurlyBrace 10
@@ -123,4 +136,5 @@ Describe 'Basic enum errors' -Tags "CI" {
     ShouldBeParseError 'enum foo { e = "hello" }' CannotConvertValue 15 -SkipAndCheckRuntimeError
     ShouldBeParseError 'enum foo { a;b;c;' MissingEndCurlyBrace 10
     ShouldBeParseError 'enum foo : string { a }' InvalidUnderlyingType 11 -SkipAndCheckRuntimeError
+    }
 }

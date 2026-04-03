@@ -19,9 +19,11 @@ Describe "Clone array" -Tags "CI" {
 }
 
 Describe "Set fields through PSMemberInfo" -Tags "CI" {
+    BeforeAll {
     Add-Type @"
     public struct AStruct { public string s; }
 "@
+    }
 
     It "via cast" {
         ([AStruct]@{s = "abc" }).s | Should -BeExactly "abc"
@@ -67,7 +69,9 @@ Describe "MSFT:3309783" -Tags "CI" {
 
 Describe "ScriptBlockAst.GetScriptBlock throws on error" -Tags "CI" {
 
+    BeforeAll {
     $e = $null
+    }
 
     It "with parse error" {
         $ast = [System.Management.Automation.Language.Parser]::ParseInput('function ', [ref]$null, [ref]$e)
@@ -83,6 +87,7 @@ Describe "ScriptBlockAst.GetScriptBlock throws on error" -Tags "CI" {
 }
 
 Describe "Hashtable key property syntax" -Tags "CI" {
+    BeforeAll {
     $script = @'
     # First create a hashtable wrapped in PSObject
     $hash = New-Object hashtable
@@ -93,6 +98,7 @@ Describe "Hashtable key property syntax" -Tags "CI" {
     # works in PS 2,3,4. Fails in PS 5:
     $hash.$key
 '@
+    }
 
     It "In current process" {
         # Run in current process, but something that ran earlier could influence
@@ -109,7 +115,9 @@ Describe "Hashtable key property syntax" -Tags "CI" {
 
 Describe "Assign automatic variables" -Tags "CI" {
 
+    BeforeDiscovery {
     $autos = '_', 'args', 'this', 'input', 'pscmdlet', 'psboundparameters', 'myinvocation', 'psscriptroot', 'pscommandpath'
+    }
 
     foreach ($auto in $autos)
     {
@@ -145,24 +153,26 @@ Describe "Assign automatic variables" -Tags "CI" {
 
 Describe "Assign readonly/constant variables" -Tags "CI" {
 
+    BeforeDiscovery {
     $testCase = @(
         @{ sb_wo_conversion = { $? = 1 }; name = '$? = 1' }
         @{ sb_wo_conversion = { $HOME = 1 }; name = '$HOME = 1' }
         @{ sb_wo_conversion = { $PID = 1 }; name = '$PID = 1' }
     )
-
+    }
     It "Assign readonly/constant variables w/o type constraint - '<name>'" -TestCases $testCase {
         param($sb_wo_conversion)
         { & $sb_wo_conversion } | Should -Throw -ErrorId "VariableNotWritable"
         { . $sb_wo_conversion } | Should -Throw -ErrorId "VariableNotWritable"
     }
 
+    BeforeDiscovery {
     $testCase = @(
         @{ sb_w_conversion = { [datetime]$? = 1 }; name = '[datetime]$? = 1' }
         @{ sb_w_conversion = { [datetime]$HOME = 1 }; name = '[datetime]$HOME = 1' }
         @{ sb_w_conversion = { [datetime]$PID = 1 }; name = '[datetime]$PID = 1' }
     )
-
+    }
     It "Assign readonly/constant variables w/ type constraint - '<name>'" -TestCases $testCase {
         param($sb_w_conversion)
         { & $sb_w_conversion } | Should -Throw -ErrorId "VariableNotWritable"

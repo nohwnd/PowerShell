@@ -239,12 +239,14 @@ Describe "TabCompletion" -Tags CI {
         $res.CompletionMatches.Count | Should -Be 0
     }
 
+    BeforeAll {
     foreach ($Operator in [System.Management.Automation.CompletionCompleters]::CompleteOperator(""))
     {
         It "Should complete $($Operator.CompletionText)" {
             $res = TabExpansion2 -inputScript "'' $($Operator.CompletionText)" -cursorColumn ($Operator.CompletionText.Length + 3)
             $res.CompletionMatches[0].CompletionText | Should -BeExactly $Operator.CompletionText
         }
+    }
     }
 
     context CustomProviderTests {
@@ -2141,8 +2143,8 @@ class InheritedClassTest : System.Attribute
 
     Context "Script name completion" {
         BeforeAll {
-            Setup -f 'install-powershell.ps1' -Content ""
-            Setup -f 'remove-powershell.ps1' -Content ""
+            Set-Content -Path (Join-Path $TestDrive 'install-powershell.ps1') -Value ""
+            Set-Content -Path (Join-Path $TestDrive 'remove-powershell.ps1') -Value ""
 
             $scriptWithWildcardCases = @(
                 @{
@@ -2186,11 +2188,11 @@ class InheritedClassTest : System.Attribute
 
     Context "Script parameter completion" {
         BeforeAll {
-            Setup -File -Path 'ModuleReqTest.ps1' -Content @'
+            Set-Content -Path (Join-Path $TestDrive 'ModuleReqTest.ps1') -Value @'
 #requires -Modules ThisModuleDoesNotExist
 param ($Param1)
 '@
-            Setup -File -Path 'AdminReqTest.ps1' -Content @'
+            Set-Content -Path (Join-Path $TestDrive 'AdminReqTest.ps1') -Value @'
 #requires -RunAsAdministrator
 param ($Param1)
 '@
@@ -4012,6 +4014,7 @@ Describe "WSMan Config Provider tab complete tests" -Tags Feature,RequireAdminOn
         # https://github.com/PowerShell/PowerShell/issues/4744
         # TODO: move to test cases above once working
     }
+<<<<<<< HEAD
 
     Context "Tab completion for switch cases on `$PSBoundParameters.Keys" {
         It "Should complete parameter names in switch case for `$PSBoundParameters.Keys" {
@@ -4194,3 +4197,6 @@ function Test-Func {
         }
     }
 }
+=======
+}
+>>>>>>> c213a5d06 (Migrate Pester tests from v4 to v5)

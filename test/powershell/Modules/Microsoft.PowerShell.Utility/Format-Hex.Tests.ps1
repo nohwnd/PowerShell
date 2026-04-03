@@ -18,7 +18,7 @@ Describe "FormatHex" -tags "CI" {
 
         $newline = [Environment]::Newline
 
-        Setup -d FormatHexDataDir
+        New-Item -Path (Join-Path $TestDrive 'FormatHexDataDir') -ItemType Directory -Force > $null
         $inputFile1 = New-Item -Path "$TestDrive/SourceFile-1.txt"
         $inputText1 = 'Hello World'
         Set-Content -LiteralPath $inputFile1.FullName -Value $inputText1 -NoNewline
@@ -62,6 +62,7 @@ public enum TestSByteEnum : sbyte {
 '@
         }
 
+        BeforeDiscovery {
         $testCases = @(
             @{
                 Name           = "Can process bool type 'fhx -InputObject `$true'"
@@ -136,6 +137,7 @@ public enum TestSByteEnum : sbyte {
                 ExpectedResult = "0000000000000000   FF FE FD FC                                      .þýü"
             }
         )
+        }
 
         It "<Name>" -TestCase $testCases {
 
@@ -164,6 +166,7 @@ public enum TestSByteEnum : sbyte {
 '@
         }
 
+        BeforeDiscovery {
         $testCases = @(
             @{
                 Name           = "Can process bool type '`$true | fhx'"
@@ -259,6 +262,7 @@ public enum TestSByteEnum : sbyte {
                 ExpectedResult = "0000000000000000   FF FE FD FC                                      ÿþýü"
             }
         )
+        }
 
         It "<Name>" -TestCases $testCases {
 
@@ -275,6 +279,7 @@ public enum TestSByteEnum : sbyte {
             }
         }
 
+        BeforeDiscovery {
         $heterogenousInputCases = @(
             @{
                 InputScript     = { [sbyte[]](-15, 18, 21, -5), "hello", [byte[]](1..6), 1, 2, 3, 4 }
@@ -324,6 +329,7 @@ public enum TestSByteEnum : sbyte {
                 ).ForEach{ [regex]::Escape($_) } -join '|'
             }
         )
+        }
 
         It 'can process jagged input: <InputScript>' -TestCases $heterogenousInputCases {
             param($InputScript, $Count, $ExpectedResults, $ExpectedLabels)
@@ -341,6 +347,7 @@ public enum TestSByteEnum : sbyte {
 
     Context "Path and LiteralPath Parameters" {
 
+        BeforeDiscovery {
         $testDirectory = $inputFile1.DirectoryName
 
         $testCases = @(
@@ -381,6 +388,7 @@ public enum TestSByteEnum : sbyte {
                 ExpectedSecondResult = $inputText3
             }
         )
+        }
 
         It "<Name>" -TestCase $testCases {
 
@@ -419,6 +427,7 @@ public enum TestSByteEnum : sbyte {
     }
 
     Context "Encoding Parameter" {
+        BeforeDiscovery {
         $testCases = @(
             @{
                 Name           = "Can process ASCII encoding 'fhx -InputObject 'hello' -Encoding ASCII'"
@@ -465,6 +474,7 @@ public enum TestSByteEnum : sbyte {
                 ExpectedSecondResult = "0000000000000010   6F 00 00 00                                      o   "
             }
         )
+        }
 
         It "<Name>" -TestCase $testCases {
 
@@ -480,6 +490,7 @@ public enum TestSByteEnum : sbyte {
 
     Context "Validate Error Scenarios" {
 
+        BeforeDiscovery {
         $testDirectory = $inputFile1.DirectoryName
 
         $testCases = @(
@@ -497,6 +508,7 @@ public enum TestSByteEnum : sbyte {
                 ExpectedFullyQualifiedErrorId = "FormatHexTypeNotSupported,Microsoft.PowerShell.Commands.FormatHex"
             }
         )
+        }
 
         It "<Name>" -Skip:$skipTest -TestCase $testCases {
 
@@ -515,6 +527,7 @@ public enum TestSByteEnum : sbyte {
 
     Context "Continues to Process Valid Paths" {
 
+        BeforeDiscovery {
         $testCases = @(
             @{
                 Name                          = "If given invalid path in array, continues to process valid paths 'fhx -Path `$invalidPath, `$inputFile1  -ErrorVariable e -ErrorAction SilentlyContinue'"
@@ -534,6 +547,7 @@ public enum TestSByteEnum : sbyte {
                 ExpectedFullyQualifiedErrorId = "FormatHexOnlySupportsFileSystemPaths,Microsoft.PowerShell.Commands.FormatHex"
             }
         )
+        }
 
         It "<Name>" -Skip:$skipTest -TestCase $testCases {
 

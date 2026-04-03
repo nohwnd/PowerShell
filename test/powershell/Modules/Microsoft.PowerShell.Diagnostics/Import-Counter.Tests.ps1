@@ -228,6 +228,7 @@ Describe "CI tests for Import-Counter cmdlet" -Tags "CI" {
         SetScriptVars $testDrive 0 $false
     }
 
+    BeforeAll {
     $performatTestCases = @(
         @{
             Name = "Can import all samples from known sample sets"
@@ -252,6 +253,7 @@ Describe "CI tests for Import-Counter cmdlet" -Tags "CI" {
     {
         RunPerFileTypeTests $testCase
     }
+    }
 }
 
 Describe "Feature tests for Import-Counter cmdlet" -Tags "Feature" {
@@ -267,6 +269,7 @@ Describe "Feature tests for Import-Counter cmdlet" -Tags "Feature" {
     }
 
     Context "Validate incorrect usage" {
+        BeforeAll {
         $testCases = @(
             @{
                 Name = "Fails when given non-existent path"
@@ -350,6 +353,7 @@ Describe "Feature tests for Import-Counter cmdlet" -Tags "Feature" {
         {
             RunExpectedFailureTest $testCase
         }
+        }
 
         It "Multiple errors when BLG file contains bad sample data" -Skip:$(SkipCounterTests) {
             $errVar = $null
@@ -365,6 +369,7 @@ Describe "Feature tests for Import-Counter cmdlet" -Tags "Feature" {
     }
 
     Context "Import tests" {
+        BeforeAll {
         $performatTestCases = @(
             @{
                 Name = "Can import all samples"
@@ -455,6 +460,7 @@ Describe "Feature tests for Import-Counter cmdlet" -Tags "Feature" {
         foreach ($testCase in $performatTestCases)
         {
             RunPerFileTypeTests $testCase
+        }
         }
     }
 }

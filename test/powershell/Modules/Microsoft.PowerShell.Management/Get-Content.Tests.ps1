@@ -1,6 +1,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 Describe "Get-Content" -Tags "CI" {
+    BeforeDiscovery {
     $testString = "This is a test content for a file"
     $nl         = [Environment]::NewLine
     $firstline  = "Here's a first line "
@@ -13,6 +14,21 @@ Describe "Get-Content" -Tags "CI" {
     $testPath2  = Join-Path -Path $TestDrive -ChildPath testfile2
     $testContent = "AA","BB","CC","DD"
     $testDelimiterContent = "Hello1,World1","Hello2,World2","Hello3,World3","Hello4,World4"
+    }
+    BeforeAll {
+    $testString = "This is a test content for a file"
+    $nl         = [Environment]::NewLine
+    $firstline  = "Here's a first line "
+    $secondline = " here's a second line"
+    $thirdline  = "more text"
+    $fourthline = "just to make sure"
+    $fifthline  = "there's plenty to work with"
+    $testString2 = $firstline + $nl + $secondline + $nl + $thirdline + $nl + $fourthline + $nl + $fifthline
+    $testPath   = Join-Path -Path $TestDrive -ChildPath testfile1
+    $testPath2  = Join-Path -Path $TestDrive -ChildPath testfile2
+    $testContent = "AA","BB","CC","DD"
+    $testDelimiterContent = "Hello1,World1","Hello2,World2","Hello3,World3","Hello4,World4"
+    }
 
     BeforeEach {
         New-Item -Path $testPath -ItemType file -Force -Value $testString

@@ -1,7 +1,9 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 Describe "ConvertTo-Csv DRT Unit Tests" -Tags "CI" {
+    BeforeAll {
     $inputObject = [pscustomobject]@{ First = 1; Second = 2 }
+    }
 
     It "Test convertto-csv with psobject pipelined" {
         $returnObject = $inputObject | ConvertTo-Csv -IncludeTypeInformation

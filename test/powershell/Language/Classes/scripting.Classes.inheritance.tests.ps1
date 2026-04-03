@@ -179,6 +179,7 @@ class ClassWithStaticAbstractInterface : IInterfaceWithStaticAbstractProperty {
 }
 
 Describe 'Classes inheritance syntax errors' -Tags "CI" {
+    BeforeAll {
     ShouldBeParseError "class A : NonExistingClass {}" TypeNotFound 10
     ShouldBeParseError "class A : {}" TypeNameExpected 9
     ShouldBeParseError "class A {}; class B : A, {}" TypeNameExpected 24
@@ -213,6 +214,7 @@ Describe 'Classes inheritance syntax errors' -Tags "CI" {
     # inheritance doesn't allow circular order
     ShouldBeParseError "class A : B {}; class B : A {}" TypeNotFound 10 -SkipAndCheckRuntimeError
     ShouldBeParseError "class A : C {}; class B : A {}; class C : B {}" TypeNotFound 10 -SkipAndCheckRuntimeError
+    }
 }
 
 Describe 'Classes methods with inheritance' -Tags "CI" {
@@ -502,6 +504,7 @@ Describe 'Classes methods with inheritance' -Tags "CI" {
     }
 
     Context 'base static method call' {
+        BeforeAll {
         class A
         {
             static [string]ToStr([int]$a) {return "A" + $a}
@@ -512,6 +515,7 @@ Describe 'Classes methods with inheritance' -Tags "CI" {
         }
 
         $b = [B]::new()
+        }
 
         # MSFT:1911652
         # MSFT:2973835
@@ -528,6 +532,7 @@ Describe 'Classes methods with inheritance' -Tags "CI" {
 Describe 'Classes inheritance ctors syntax errors' -Tags "CI" {
 
     #DotNet.Interface.NotImplemented
+    BeforeAll {
     ShouldBeParseError "class MyComparable : system.IComparable {}" TypeCreationError 0 -SkipAndCheckRuntimeError
 
     #DotNet.Interface.WrongSignature
@@ -538,6 +543,7 @@ Describe 'Classes inheritance ctors syntax errors' -Tags "CI" {
 
     #NoDefaultCtor
     ShouldBeParseError 'class A { A([int]$a) {} }; class B : A {}' BaseClassNoDefaultCtor 27 -SkipAndCheckRuntimeError
+    }
 }
 
 Describe 'Classes inheritance ctors' -Tags "CI" {

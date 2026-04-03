@@ -54,6 +54,7 @@ try
         }
 
         Context "Rename-Computer Error Conditions" {
+            BeforeAll {
             $testcases =
                 @{ OldName = "." ; NewName = "localhost" ; ExpectedError = "FailToRenameComputer,Microsoft.PowerShell.Commands.RenameComputerCommand" },
                 @{ OldName = "." ; NewName = "." ; ExpectedError = "InvalidNewName,Microsoft.PowerShell.Commands.RenameComputerCommand" },
@@ -62,6 +63,7 @@ try
                 @{ OldName = "." ; NewName = ${env:ComputerName} ; ExpectedError = "NewNameIsOldName,Microsoft.PowerShell.Commands.RenameComputerCommand" },
                 @{ OldName = "." ; NewName = ${env:ComputerName} + "." + ${env:USERDNSDOMAIN} ; ExpectedError = "InvalidNewName,Microsoft.PowerShell.Commands.RenameComputerCommand" },
                 @{ OldName = ".\$#" ; NewName  = "NewName"; ExpectedError = "AddressResolutionException,Microsoft.PowerShell.Commands.RenameComputerCommand" }
+            }
 
             It "Renaming '<OldName>' to '<NewName>' creates the right error" -testcase $testcases {
                 param ( $OldName, $NewName, $ExpectedError )

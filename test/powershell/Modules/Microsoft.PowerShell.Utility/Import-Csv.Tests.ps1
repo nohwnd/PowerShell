@@ -89,15 +89,13 @@ Describe "Import-Csv Double Quote Delimiter" -Tags "CI" {
 }
 
 Describe "Import-Csv File Format Tests" -Tags "CI" {
-    BeforeAll {
-        # The file is w/o header
+    BeforeDiscovery {
         $TestImportCsv_NoHeader = Join-Path -Path (Join-Path $PSScriptRoot -ChildPath assets) -ChildPath TestImportCsv_NoHeader.csv
-        # The file is with header
         $TestImportCsv_WithHeader = Join-Path -Path (Join-Path $PSScriptRoot -ChildPath assets) -ChildPath TestImportCsv_WithHeader.csv
-        # The file is W3C Extended Log File Format
         $TestImportCsv_W3C_ELF = Join-Path -Path (Join-Path $PSScriptRoot -ChildPath assets) -ChildPath TestImportCsv_W3C_ELF.csv
-
         $testCSVfiles = $TestImportCsv_NoHeader, $TestImportCsv_WithHeader, $TestImportCsv_W3C_ELF
+    }
+    BeforeAll {
         $orginalHeader = "Column1","Column2","Column 3"
         $customHeader = "test1","test2","test3"
     }

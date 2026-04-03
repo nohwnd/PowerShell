@@ -2,6 +2,7 @@
 # Licensed under the MIT License.
 Describe "Tests for paths of submodules in module manifest" -tags "CI" {
 
+    BeforeAll {
     $moduleName = 'ModuleA'
     $moduleFileName = "$moduleName.psd1"
     $submoduleName = 'ModuleB'
@@ -10,6 +11,7 @@ Describe "Tests for paths of submodules in module manifest" -tags "CI" {
     $moduleFilePath = Join-Path $moduleRootPath $moduleFileName
     $nestedModulePath = Join-Path $moduleRootPath $submoduleName
     $nestedModuleFilePath = Join-Path $nestedModulePath $submoduleFileName
+    }
 
     BeforeEach {
 
@@ -20,6 +22,7 @@ Describe "Tests for paths of submodules in module manifest" -tags "CI" {
         "function TestModuleFunction{'Hello from TestModuleFunction'}" | Out-File $nestedModuleFilePath
     }
 
+    BeforeDiscovery {
     $testCases = @(
         @{ SubModulePath = "$submoduleName" }
         @{ SubModulePath = "$submoduleName\$submoduleName" }
@@ -37,6 +40,7 @@ Describe "Tests for paths of submodules in module manifest" -tags "CI" {
         @{ SubModulePath = "./$submoduleName/$submoduleFileName" }
         @{ SubModulePath = "./$submoduleName\$submoduleFileName" }
     )
+    }
 
     It "Test if NestedModule path is <SubModulePath>" -TestCases $testCases {
         param($SubModulePath)

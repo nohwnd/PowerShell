@@ -243,7 +243,7 @@ Categories=Application;
             }
             else
             {
-                Set-TestInconclusive -Message "AppleScript is not currently reliable on Az Pipelines"
+                Set-ItResult -Inconclusive -Because "AppleScript is not currently reliable on Az Pipelines"
                 # validate on MacOS by using AppleScript
                 $beforeCount = Get-WindowCountMacOS -Name Finder
                 Invoke-Item -Path $PSHOME

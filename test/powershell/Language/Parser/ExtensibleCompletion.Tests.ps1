@@ -93,6 +93,7 @@ function Test-Completions
         foreach ($test in $TestCases)
         {
             Context ("Command line: <" + $test.TestInput + ">") {
+                BeforeAll {
                 $results = Get-Completions $test.TestInput
                 foreach ($result in $results.CompletionMatches)
                 {
@@ -103,6 +104,7 @@ function Test-Completions
                             $expected.Found = $true
                         }
                     }
+                }
                 }
                 foreach ($expected in $test.ExpectedResults)
                 {
@@ -265,6 +267,7 @@ Describe "Test class based extensible completion" -Tags "CI" {
 }
 
 Describe "Test registration based extensible completion" -Tags "CI" {
+    BeforeAll {
     Register-ArgumentCompleter -Command TestFunction -Parameter Gamma -ScriptBlock {
         param(
             [string] $CommandName,
@@ -278,6 +281,7 @@ Describe "Test registration based extensible completion" -Tags "CI" {
         $result = "beta: $beta  alpha: $alpha  command: $commandName  parameterName: $parameterName  wordToComplete: $wordToComplete"
         [CompletionResult]::new($result, $result, "ParameterValue", $result)
     }
+    }
 
     @{
         ExpectedResults = @(
@@ -288,9 +292,11 @@ Describe "Test registration based extensible completion" -Tags "CI" {
 }
 
 Describe "Test extensible completion of native commands" -Tags "CI" {
+    BeforeAll {
     Register-ArgumentCompleter -Command netsh -Native -ScriptBlock {
         [CompletionResult]::new('advfirewall', 'advfirewall', "ParameterValue", 'advfirewall')
         [CompletionResult]::new('bridge', 'bridge', "ParameterValue", 'bridge')
+    }
     }
 
     @{
@@ -303,6 +309,7 @@ Describe "Test extensible completion of native commands" -Tags "CI" {
 }
 
 Describe "Test completion of parameters for native commands" -Tags "CI" {
+    BeforeAll {
     Register-ArgumentCompleter -Native -CommandName foo -ScriptBlock {
         Param($wordToComplete)
 
@@ -313,6 +320,7 @@ Describe "Test completion of parameters for native commands" -Tags "CI" {
         ForEach-Object {
             [CompletionResult]::new($_, $_, [CompletionResultType]::ParameterName, $_)
         }
+    }
     }
 
     @{

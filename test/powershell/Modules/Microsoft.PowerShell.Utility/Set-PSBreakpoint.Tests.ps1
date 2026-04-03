@@ -4,6 +4,7 @@ $ps = Join-Path -Path $PSHOME -ChildPath "pwsh"
 
 Describe "Set-PSBreakpoint DRT Unit Tests" -Tags "CI" {
     #Set up
+    BeforeAll {
     $scriptFileName = Join-Path $TestDrive -ChildPath breakpointTestScript.ps1
     $scriptFileNameBug = Join-Path -Path $TestDrive -ChildPath SetPSBreakpointTests.ExposeBug154112.ps1
 
@@ -37,6 +38,7 @@ set-psbreakpoint -command foo
 
     $contents > $scriptFileName
     $contentsBug > $scriptFileNameBug
+    }
 
     It "Should be able to set psbreakpoints for -Line" {
         $brk = Set-PSBreakpoint -Line 13 -Script $scriptFileName
@@ -180,15 +182,19 @@ set-psbreakpoint -command foo
     }
 
     # clean up
+    BeforeAll {
     Remove-Item -Path $scriptFileName -Force
     Remove-Item -Path $scriptFileNameBug -Force
+    }
 }
 
 Describe "Set-PSBreakpoint" -Tags "CI" {
     # Set up test script
+    BeforeAll {
     $testScript = Join-Path -Path $PSScriptRoot -ChildPath psbreakpointtestscript.ps1
 
     "`$var = 1 " > $testScript
+    }
 
     It "Should be able to set a psbreakpoint on a line" {
         $lineNumber = 1
@@ -220,5 +226,7 @@ Describe "Set-PSBreakpoint" -Tags "CI" {
     }
 
     # clean up after ourselves
+    BeforeAll {
     Remove-Item -Path $testScript
+    }
 }

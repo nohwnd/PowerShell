@@ -2,6 +2,7 @@
 # Licensed under the MIT License.
 
 Describe 'Argument transformation attribute on optional argument with explicit $null' -Tags "CI" {
+    BeforeAll {
     $tdefinition = @'
     using System;
     using System.Management.Automation;
@@ -67,6 +68,7 @@ Describe 'Argument transformation attribute on optional argument with explicit $
               [Uint64]$Address = 11)
 
         return $Address
+    }
     }
 
     It "There was no error importing the in-memory module" {

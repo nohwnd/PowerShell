@@ -8,6 +8,7 @@ Describe 'PSModuleInfo.GetExportedTypeDefinitions()' -Tags "CI" {
 }
 
 Describe 'use of a module from two runspaces' -Tags "CI" {
+    BeforeAll {
     function New-TestModule {
         param(
             [string]$Name,
@@ -32,7 +33,6 @@ Describe 'use of a module from two runspaces' -Tags "CI" {
     }
 
     $originalPSModulePath = $env:PSModulePath
-    try {
 
         New-TestModule -Name 'Random' -Content @'
 $script:random = Get-Random
@@ -44,6 +44,11 @@ class RandomWrapper
     }
 }
 '@
+    }
+
+    AfterAll {
+        $env:PSModulePath = $originalPSModulePath
+    }
 
         It 'use different sessionStates for different modules' {
             $ps = 1..2 | ForEach-Object { $p = [powershell]::Create().AddScript(@'
@@ -67,10 +72,6 @@ Import-Module Random
             $res[0] | Should -Be $res[2]
             $res[1] | Should -Be $res[3]
         }
-
-    } finally {
-        $env:PSModulePath = $originalPSModulePath
-    }
 
 }
 

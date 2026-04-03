@@ -45,6 +45,7 @@ Describe "Redirection operator now supports encoding changes" -Tags "CI" {
         }
     }
 
+    BeforeDiscovery {
     $availableEncodings =
         @([System.Text.Encoding]::ASCII
           [System.Text.Encoding]::BigEndianUnicode
@@ -53,24 +54,23 @@ Describe "Redirection operator now supports encoding changes" -Tags "CI" {
           [System.Text.Encoding]::UTF7
           [System.Text.Encoding]::UTF8
           [System.Text.Encoding]::UTF32)
+    $encodingTestCases = $availableEncodings | ForEach-Object { @{ EncodingName = $_.EncodingName; Encoding = $_ } }
+    }
 
-    foreach($encoding in $availableEncodings) {
+    It "Overriding encoding for Out-File is respected for <EncodingName>" -TestCases $encodingTestCases {
+        param($EncodingName, $Encoding)
 
-        $encodingName = $encoding.EncodingName
-        $msg = "Overriding encoding for Out-File is respected for $encodingName"
-        $BOM = $encoding.GetPreamble()
-        $TXT = $encoding.GetBytes($asciiString)
-        $CR  = $encoding.GetBytes($asciiCR)
+        $BOM = $Encoding.GetPreamble()
+        $TXT = $Encoding.GetBytes($asciiString)
+        $CR  = $Encoding.GetBytes($asciiCR)
         $expectedBytes = @( $BOM; $TXT; $CR )
-        $PSDefaultParameterValues["Out-File:Encoding"] = $encoding
+        $PSDefaultParameterValues["Out-File:Encoding"] = $Encoding
         $asciiString > TESTDRIVE:/file.txt
         $observedBytes = Get-Content -AsByteStream TESTDRIVE:/file.txt
         # THE TEST
-        It $msg {
-            $observedBytes.Count | Should -Be $expectedBytes.Count
-            for($i = 0;$i -lt $observedBytes.Count; $i++) {
-                $observedBytes[$i] | Should -Be $expectedBytes[$i]
-            }
+        $observedBytes.Count | Should -Be $expectedBytes.Count
+        for($i = 0;$i -lt $observedBytes.Count; $i++) {
+            $observedBytes[$i] | Should -Be $expectedBytes[$i]
         }
     }
 }

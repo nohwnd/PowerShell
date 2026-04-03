@@ -260,6 +260,7 @@ Describe 'Generic Method invocation' -Tags 'CI' {
 
 Describe "Interface inheritance with remoting proxies" -Tags "CI" {
 
+    BeforeAll {
     if ( $IsCoreCLR ) {
         Write-Verbose -Verbose "Skip this test because it's .NET Framework dependency."
         return
@@ -319,6 +320,7 @@ namespace MSFT_716893
 "@
 
     Add-Type -TypeDefinition $src -ReferencedAssemblies System.ServiceModel.dll
+    }
 
     BeforeEach {
         [MSFT_716893.Service]::Init()

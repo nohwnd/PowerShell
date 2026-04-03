@@ -388,6 +388,7 @@ Describe "Measure-Object DRT basic functionality" -Tags "CI" {
 Describe "Directly test the PSPropertyExpression type" -Tags "CI" {
     # this function is used to test the use of PSPropertyExpression
     # as a parameter in script
+    BeforeAll {
     function Test-PSPropertyExpression {
         [CmdletBinding()]
         param (
@@ -400,6 +401,7 @@ Describe "Directly test the PSPropertyExpression type" -Tags "CI" {
         begin { $sum = 0}
         process { $sum += $pe.GetValues($InputObject).result }
         end { $sum }
+    }
     }
 
     It "Test-PropertyExpression function with a wildcard property expression should sum numbers" {

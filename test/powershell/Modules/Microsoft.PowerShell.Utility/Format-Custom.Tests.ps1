@@ -39,6 +39,7 @@ Describe "Format-Custom DRT basic functionality" -Tags "CI" {
         }
     }
 
+    BeforeAll {
     Add-Type -TypeDefinition @"
     public abstract class NamedItem
     {
@@ -70,6 +71,7 @@ Describe "Format-Custom DRT basic functionality" -Tags "CI" {
         public string data2;
     }
 "@
+    }
 
     It "Format-Custom with subobject should work" {
         $expectResult1 = "this is the name"
@@ -466,6 +468,7 @@ SelectScriptBlock
         $ps.Invoke() -replace '\r?\n', "^" | Should -BeExactly $expectedOutput
         $ps.Streams.Error | Should -BeNullOrEmpty
     }
+<<<<<<< HEAD
 
     Context 'ExcludeProperty parameter' {
         It 'Should exclude specified properties' {
@@ -511,3 +514,6 @@ SelectScriptBlock
         }
     }
 }
+=======
+}
+>>>>>>> c213a5d06 (Migrate Pester tests from v4 to v5)

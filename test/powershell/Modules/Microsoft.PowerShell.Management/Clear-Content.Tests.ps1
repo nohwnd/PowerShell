@@ -46,13 +46,13 @@ Describe "Clear-Content cmdlet tests" -Tags "CI" {
     $file3 = "file3.txt"
     $content1 = "This is content"
     $content2 = "This is content for alternate stream tests"
-    Setup -File "$file1"
-    Setup -File "$file2" -Content $content1
-    Setup -File "$file3" -Content $content2
+    New-Item -Path (Join-Path $TestDrive $file1) -ItemType File -Force > $null
+    Set-Content -Path (Join-Path $TestDrive '$file2') -Value $content1
+    Set-Content -Path (Join-Path $TestDrive '$file3') -Value $content2
     $streamContent = "content for alternate stream"
     $streamName = "altStream1"
     $dirName = "clearcontent"
-    Setup -Directory "$dirName"
+    New-Item -Path (Join-Path $TestDrive $dirName) -ItemType Directory -Force > $null
   }
 
   Context "Clear-Content should actually clear content" {

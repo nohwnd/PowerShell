@@ -57,7 +57,9 @@ Describe 'Online help tests for PowerShell Cmdlets' -Tags "Feature" {
 
 Describe 'Get-Help -Online is not supported on Nano Server and IoT' -Tags "CI" {
 
+    BeforeAll {
     $skipTest = -not ([System.Management.Automation.Platform]::IsIoT -or [System.Management.Automation.Platform]::IsNanoServer)
+    }
 
     It "Get-help -online <cmdletName> throws InvalidOperation." -Skip:$skipTest {
         { Get-Help Get-Help -Online } | Should -Throw -ErrorId "InvalidOperation,Microsoft.PowerShell.Commands.GetHelpCommand"
