@@ -2,8 +2,7 @@
 # Licensed under the MIT License.
 Describe "Windows Installer" -Tags "Scenario" {
 
-    BeforeAll {
-        $skipTest = -not $IsWindows
+    BeforeDiscovery {
         $preRequisitesLink =  'https://aka.ms/pscore6-prereq'
         $linkCheckTestCases = @(
             @{ Name = "Universal C Runtime"; Url = $preRequisitesLink }
@@ -11,6 +10,11 @@ Describe "Windows Installer" -Tags "Scenario" {
             @{ Name = "WMF 5.0"; Url = "https://www.microsoft.com/download/details.aspx?id=50395" }
             @{ Name = "WMF 5.1"; Url = "https://www.microsoft.com/download/details.aspx?id=54616" }
         )
+    }
+
+    BeforeAll {
+        $skipTest = -not $IsWindows
+        $preRequisitesLink =  'https://aka.ms/pscore6-prereq'
     }
 
     It "WiX (Windows Installer XML) file contains pre-requisites link $preRequisitesLink" -Skip:$skipTest {
